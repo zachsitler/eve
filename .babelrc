@@ -1,6 +1,6 @@
 {
+  "presets": ["es2015", "stage-0", "jest"],
   "plugins": [
-    "transform-flow-strip-types",
-    "transform-es2015-modules-commonjs"
+    "transform-flow-strip-types"
   ]
 }

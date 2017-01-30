@@ -1,0 +1,43 @@
+// @flow
+const fs = require('fs');
+const readline = require('readline');
+const { Scanner } = require('./scanner');
+
+function run(input) {
+  const scanner = new Scanner(input);
+  scanner
+    .tokens
+    .forEach(t => console.log(t));
+}
+
+function runFile(path) {
+  const contents = fs.readFileSync(path, 'utf8');
+  run(contents);
+}
+
+function runPrompt() {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    prompt: '> ',
+  });
+
+  rl.prompt();
+
+  rl.on('line', (line) => {
+    run(line);
+    rl.prompt();
+  });
+
+  rl.on('close', () => {
+    process.exit();
+  });
+}
+
+if (process.argv.length > 3) {
+  console.log('Usage: eve [script]');
+} else if (process.argv.length === 3) {
+  runFile(process.argv[2]);
+} else {
+  runPrompt();
+}
