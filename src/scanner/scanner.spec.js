@@ -4,31 +4,31 @@ const { TokenType } = require('../token');
 describe('Scanner', () => {
   describe('identifiers', () => {
     it('tokenizes \'foo\' correctly', () => {
-      const token = new Scanner('foo').nextToken();
+      const token = new Scanner('foo').scanToken();
       expect(token.type).toBe(TokenType.IDENTFIER);
       expect(token.literal).toBe('foo');
     });
 
     it('tokenizes \'foo1234\' correctly', () => {
-      const token = new Scanner('foo1234').nextToken();
+      const token = new Scanner('foo1234').scanToken();
       expect(token.type).toBe(TokenType.IDENTFIER);
       expect(token.literal).toBe('foo1234');
     });
 
     it('tokenizes \'_foo1234\' correctly', () => {
-      const token = new Scanner('_foo1234').nextToken();
+      const token = new Scanner('_foo1234').scanToken();
       expect(token.type).toBe(TokenType.IDENTFIER);
       expect(token.literal).toBe('_foo1234');
     });
 
     it('tokenizes \'_foo_1234_\' correctly', () => {
-      const token = new Scanner('_foo_1234_').nextToken();
+      const token = new Scanner('_foo_1234_').scanToken();
       expect(token.type).toBe(TokenType.IDENTFIER);
       expect(token.literal).toBe('_foo_1234_');
     });
 
     it('does not tokenize \'1234a\'', () => {
-      const token = new Scanner('1234a').nextToken();
+      const token = new Scanner('1234a').scanToken();
       expect(token.type).toBe(TokenType.NUMBER);
       expect(token.literal).toBe('1234');
     });
@@ -36,13 +36,13 @@ describe('Scanner', () => {
 
   describe('numbers', () => {
     it('tokenizes \'1234\' correctly', () => {
-      const token = new Scanner('1234').nextToken();
+      const token = new Scanner('1234').scanToken();
       expect(token.type).toBe(TokenType.NUMBER);
       expect(token.literal).toBe('1234');
     });
 
     it('tokenizes \'1234.56789\' correctly', () => {
-      const token = new Scanner('1234.56789').nextToken();
+      const token = new Scanner('1234.56789').scanToken();
       expect(token.type).toBe(TokenType.NUMBER);
       expect(token.literal).toBe('1234.56789');
     });
@@ -50,13 +50,13 @@ describe('Scanner', () => {
 
   describe('strings', () => {
     it('tokenizes \'abc123!@#$\' correctly', () => {
-      const token = new Scanner('\'abc1234!@#$\'').nextToken();
+      const token = new Scanner('\'abc1234!@#$\'').scanToken();
       expect(token.type).toBe(TokenType.STRING);
       expect(token.literal).toBe('abc1234!@#$');
     });
   });
 
-  describe('nextToken', () => {
+  describe('scanToken', () => {
     it('tokenizes punctuators correctly', () => {
       const tests = [
         { input: '+', expected: { type: TokenType.PLUS, literal: '+' } },
@@ -82,7 +82,7 @@ describe('Scanner', () => {
       ];
 
       tests.forEach(({ input, expected }) => {
-        const actual = new Scanner(input).nextToken();
+        const actual = new Scanner(input).scanToken();
         expect(actual.type).toBe(expected.type);
         expect(actual.literal).toBe(expected.literal);
       });
@@ -99,7 +99,7 @@ describe('Scanner', () => {
       ];
 
       tests.forEach(({ input, expected }) => {
-        const actual = new Scanner(input).nextToken();
+        const actual = new Scanner(input).scanToken();
         expect(actual.type).toBe(expected.type);
         expect(actual.literal).toBe(expected.literal);
       });

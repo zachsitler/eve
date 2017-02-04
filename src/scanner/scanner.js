@@ -46,13 +46,13 @@ module.exports = class Scanner {
   /*
    * Utility function for returning all the tokens in a string.
    * Small note: This is not actually used in the parser. It
-   * explicity calls `nextToken()`.
+   * explicity calls `scanToken()`.
    */
   scanTokens(): Array<Token> {
     const tokens = [];
 
     while (!this.isAtEnd()) {
-      tokens.push(this.nextToken());
+      tokens.push(this.scanToken());
     }
 
     return tokens;
@@ -63,7 +63,7 @@ module.exports = class Scanner {
    * whitespace characters. Futhermore, any illegal tokens will be explicity
    * thrown.
    */
-  nextToken(): Token {
+  scanToken(): Token {
     // Reset the read pointer.
     this.start = this.current;
 
@@ -112,7 +112,7 @@ module.exports = class Scanner {
           }
 
         case "'":
-          return this.string();
+          return this.scanString();
 
         // Skip whitespace.
         case ' ':
@@ -123,9 +123,9 @@ module.exports = class Scanner {
 
         default:
           if (Scanner.isDigit(ch)) {
-            return this.number();
+            return this.scanNumber();
           } else if (Scanner.isLetter(ch)) {
-            return this.identifier();
+            return this.scanIdentifier();
           }
           throw new Error(`Syntax error: unrecognized token "${ch}"`);
       }
@@ -141,7 +141,7 @@ module.exports = class Scanner {
    *   `123`
    *   `123.456`
    */
-  number(): Token {
+  scanNumber(): Token {
     while (Scanner.isDigit(this.peek()) || this.peek() === '.') this.consume();
     return this.addToken(TokenType.NUMBER);
   }
@@ -155,7 +155,7 @@ module.exports = class Scanner {
    *   `_abc123`
    *   `_Some_Ridiculous_Var_Name_1234_`
    */
-  identifier(): Token {
+  scanIdentifier(): Token {
     while (Scanner.isLetter(this.peek()) || Scanner.isDigit(this.peek()))
       this.consume();
 
@@ -178,7 +178,7 @@ module.exports = class Scanner {
    *
    * TODO: Support interpolation and escaping.
    */
-  string(): Token {
+  scanString(): Token {
     while (this.peek() !== "'" && !this.isAtEnd()) this.consume();
 
     if (this.isAtEnd()) {
