@@ -2,12 +2,14 @@
 const fs = require('fs');
 const readline = require('readline');
 const { Scanner } = require('./scanner');
+const { Parser } = require('./parser');
+const Eval = require('./eval');
 
 function run(input) {
   const scanner = new Scanner(input);
-  scanner
-    .tokens
-    .forEach(t => console.log(t));
+  const parser = new Parser(scanner);
+  const result = parser.parseProgram();
+  return eval(result);
 }
 
 function runFile(path) {

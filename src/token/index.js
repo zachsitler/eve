@@ -18,7 +18,7 @@ class TokenType {
   static LEFT_BRACE = 10
   static RIGHT_BRACE = 11
   static COLON = 12
-  static IDENTFIER = 13
+  static IDENTIFIER = 13
   static NUMBER = 14
   static STRING = 15
   static EQUAL = 16
@@ -35,6 +35,10 @@ class TokenType {
   static RETURN = 27
   static FN = 28
   static WHILE = 29
+  static COMMA = 30
+  static TRUE = 31
+  static FALSE = 32
+  static NULL = 33
 }
 
 /*

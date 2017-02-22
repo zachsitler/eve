@@ -5,25 +5,25 @@ describe('Scanner', () => {
   describe('identifiers', () => {
     it('tokenizes \'foo\' correctly', () => {
       const token = new Scanner('foo').scanToken();
-      expect(token.type).toBe(TokenType.IDENTFIER);
+      expect(token.type).toBe(TokenType.IDENTIFIER);
       expect(token.literal).toBe('foo');
     });
 
     it('tokenizes \'foo1234\' correctly', () => {
       const token = new Scanner('foo1234').scanToken();
-      expect(token.type).toBe(TokenType.IDENTFIER);
+      expect(token.type).toBe(TokenType.IDENTIFIER);
       expect(token.literal).toBe('foo1234');
     });
 
     it('tokenizes \'_foo1234\' correctly', () => {
       const token = new Scanner('_foo1234').scanToken();
-      expect(token.type).toBe(TokenType.IDENTFIER);
+      expect(token.type).toBe(TokenType.IDENTIFIER);
       expect(token.literal).toBe('_foo1234');
     });
 
     it('tokenizes \'_foo_1234_\' correctly', () => {
       const token = new Scanner('_foo_1234_').scanToken();
-      expect(token.type).toBe(TokenType.IDENTFIER);
+      expect(token.type).toBe(TokenType.IDENTIFIER);
       expect(token.literal).toBe('_foo_1234_');
     });
 
@@ -64,6 +64,7 @@ describe('Scanner', () => {
         { input: '/', expected: { type: TokenType.SLASH, literal: '/' } },
         { input: '*', expected: { type: TokenType.STAR, literal: '*' } },
         { input: ';', expected: { type: TokenType.SEMICOLON, literal: ';' } },
+        { input: ',', expected: { type: TokenType.COMMA, literal: ',' } },
         { input: '(', expected: { type: TokenType.LEFT_PAREN, literal: '(' } },
         { input: ')', expected: { type: TokenType.RIGHT_PAREN, literal: ')' } },
         { input: '[', expected: { type: TokenType.LEFT_BRACKET, literal: '[' } },
@@ -96,6 +97,9 @@ describe('Scanner', () => {
         { input: 'return', expected: { type: TokenType.RETURN, literal: 'return' } },
         { input: 'fn', expected: { type: TokenType.FN, literal: 'fn' } },
         { input: 'while', expected: { type: TokenType.WHILE, literal: 'while' } },
+        { input: 'true', expected: { type: TokenType.TRUE, literal: 'true' } },
+        { input: 'false', expected: { type: TokenType.FALSE, literal: 'false' } },
+        { input: 'null', expected: { type: TokenType.NULL, literal: 'null' } },
       ];
 
       tests.forEach(({ input, expected }) => {
@@ -103,6 +107,12 @@ describe('Scanner', () => {
         expect(actual.type).toBe(expected.type);
         expect(actual.literal).toBe(expected.literal);
       });
+    });
+
+    it('trims whitespace', () => {
+      const token = new Scanner('   1   ').scanToken();
+      expect(token.type).toBe(TokenType.NUMBER);
+      expect(token.literal).toBe('1');
     });
   });
 });

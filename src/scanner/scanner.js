@@ -30,12 +30,15 @@ module.exports = class Scanner {
   }
 
   static reservedWords = {
-    'let': TokenType.LET,
-    'if': TokenType.IF,
-    'else': TokenType.ELSE,
-    'return': TokenType.RETURN,
-    'fn': TokenType.FN,
-    'while': TokenType.WHILE,
+    let: TokenType.LET,
+    if: TokenType.IF,
+    else: TokenType.ELSE,
+    return: TokenType.RETURN,
+    fn: TokenType.FN,
+    while: TokenType.WHILE,
+    true: TokenType.TRUE,
+    false: TokenType.FALSE,
+    null: TokenType.NULL
   }
 
   constructor(input: string) {
@@ -77,6 +80,7 @@ module.exports = class Scanner {
         case '*': return this.addToken(TokenType.STAR);
         case ';': return this.addToken(TokenType.SEMICOLON);
         case ':': return this.addToken(TokenType.COLON);
+        case ',': return this.addToken(TokenType.COMMA);
         case '[': return this.addToken(TokenType.LEFT_BRACKET);
         case ']': return this.addToken(TokenType.RIGHT_BRACKET);
         case '{': return this.addToken(TokenType.LEFT_BRACE);
@@ -86,30 +90,30 @@ module.exports = class Scanner {
         case '=':
           if (this.match('=')) {
             return this.addToken(TokenType.EQUAL_EQUAL);
-          } else {
-            return this.addToken(TokenType.EQUAL);
           }
+          return this.addToken(TokenType.EQUAL);
+
 
         case '!':
           if (this.match('=')) {
             return this.addToken(TokenType.BANG_EQUAL);
-          } else {
-            return this.addToken(TokenType.BANG);
           }
+          return this.addToken(TokenType.BANG);
+
 
         case '<':
           if (this.match('=')) {
             return this.addToken(TokenType.LESS_EQUAL);
-          } else {
-            return this.addToken(TokenType.LESS);
           }
+          return this.addToken(TokenType.LESS);
+
 
         case '>':
           if (this.match('=')) {
             return this.addToken(TokenType.GREATER_EQUAL);
-          } else {
-            return this.addToken(TokenType.GREATER);
           }
+          return this.addToken(TokenType.GREATER);
+
 
         case "'":
           return this.scanString();
@@ -119,6 +123,7 @@ module.exports = class Scanner {
         case '\n':
         case '\t':
         case '\r':
+          this.start = this.current;
           break;
 
         default:
@@ -156,8 +161,7 @@ module.exports = class Scanner {
    *   `_Some_Ridiculous_Var_Name_1234_`
    */
   scanIdentifier(): Token {
-    while (Scanner.isLetter(this.peek()) || Scanner.isDigit(this.peek()))
-      this.consume();
+    while (Scanner.isLetter(this.peek()) || Scanner.isDigit(this.peek())) { this.consume(); }
 
     const token = this.input.substring(this.start, this.current);
     const tokenType = Scanner.reservedWords[token];
@@ -165,7 +169,7 @@ module.exports = class Scanner {
       return this.addToken(tokenType);
     }
 
-    return this.addToken(TokenType.IDENTFIER);
+    return this.addToken(TokenType.IDENTIFIER);
   }
 
   /*
