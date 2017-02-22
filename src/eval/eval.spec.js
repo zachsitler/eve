@@ -63,7 +63,7 @@ describe('Eval', () => {
       runTests(tests);
     });
 
-    it.only('handles minus operators', () => {
+    it('handles minus operators', () => {
       const tests = [
         {input: '1', expected: 1},
         {input: '10', expected: 10},

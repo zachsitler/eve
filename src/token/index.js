@@ -1,5 +1,3 @@
-// @flow
-
 /*
  * TokenType is an enum consisting on contants that are used to
  * represent lexical tokens.
@@ -45,9 +43,6 @@ class TokenType {
  * A token is used to represent a lexical token.
  */
 class Token {
-  type: number
-  literal: string
-
   constructor(type: number, literal: string) {
     this.type = type;
     this.literal = literal;

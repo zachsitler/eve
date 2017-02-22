@@ -25,10 +25,7 @@ const precedences = {
 };
 
 module.exports = class Parser {
-  tok: Token // Pointer to the current token
-  peek: Token // Pointer to the lookahead token
-
-  constructor(scanner: Scanner) {
+  constructor(scanner) {
     this.scanner = scanner;
 
     // Set tok/peek tokens
@@ -62,19 +59,19 @@ module.exports = class Parser {
     this.infix(TokenType.BANG_EQUAL);
   }
 
-  register(type: number, parser) {
+  register(type, parser) {
     this.prefixParsers[type] = parser.bind(this);
   }
 
-  registerInfix(type: number, parser) {
+  registerInfix(type, parser) {
     this.infixParsers[type] = parser.bind(this);
   }
 
-  prefix(type: number) {
+  prefix(type) {
     this.register(type, this.parsePrefixExpression);
   }
 
-  infix(type: number) {
+  infix(type) {
     this.infixParsers[type] = this.parseInfixExpression.bind(this);
   }
 
@@ -406,11 +403,11 @@ module.exports = class Parser {
     };
   }
 
-  isPeekToken(type: number): bool {
+  isPeekToken(type) {
     return this.peek.type === type;
   }
 
-  isCurToken(type: number): bool {
+  isCurToken(type) {
     return this.tok.type === type;
   }
 
@@ -419,7 +416,7 @@ module.exports = class Parser {
     this.peek = this.scanner.scanToken();
   }
 
-  peekPrecedence(): number {
+  peekPrecedence() {
     const precedence = precedences[this.peek.type];
     if (precedence) return precedence;
 

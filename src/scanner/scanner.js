@@ -7,25 +7,13 @@ const { TokenType, Token } = require('../token');
  * For example, consider the string below and it's tokenized output:
  *   let language = 'eve'; -> [LET, IDENTIFIER, EQUAL, STRING, SEMICOLON]
  *
- * @flow
  */
 module.exports = class Scanner {
-  input: string
-
-  /*
-   * The initial read pointer, used with current to
-   * get the entire lexeme.
-   */
-  start: number
-
-  // The current read pointer.
-  current: number
-
-  static isDigit(ch: string): bool {
+  static isDigit(ch) {
     return ch >= '0' && ch <= '9';
   }
 
-  static isLetter(ch: string): bool {
+  static isLetter(ch) {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch === '_';
   }
 
@@ -41,7 +29,7 @@ module.exports = class Scanner {
     null: TokenType.NULL
   }
 
-  constructor(input: string) {
+  constructor(input) {
     this.input = input;
     this.current = 0;
   }
@@ -51,7 +39,7 @@ module.exports = class Scanner {
    * Small note: This is not actually used in the parser. It
    * explicity calls `scanToken()`.
    */
-  scanTokens(): Array<Token> {
+  scanTokens() {
     const tokens = [];
 
     while (!this.isAtEnd()) {
@@ -66,7 +54,7 @@ module.exports = class Scanner {
    * whitespace characters. Futhermore, any illegal tokens will be explicity
    * thrown.
    */
-  scanToken(): Token {
+  scanToken() {
     // Reset the read pointer.
     this.start = this.current;
 
@@ -146,7 +134,7 @@ module.exports = class Scanner {
    *   `123`
    *   `123.456`
    */
-  scanNumber(): Token {
+  scanNumber() {
     while (Scanner.isDigit(this.peek()) || this.peek() === '.') this.consume();
     return this.addToken(TokenType.NUMBER);
   }
@@ -160,7 +148,7 @@ module.exports = class Scanner {
    *   `_abc123`
    *   `_Some_Ridiculous_Var_Name_1234_`
    */
-  scanIdentifier(): Token {
+  scanIdentifier() {
     while (Scanner.isLetter(this.peek()) || Scanner.isDigit(this.peek())) { this.consume(); }
 
     const token = this.input.substring(this.start, this.current);
@@ -182,7 +170,7 @@ module.exports = class Scanner {
    *
    * TODO: Support interpolation and escaping.
    */
-  scanString(): Token {
+  scanString() {
     while (this.peek() !== "'" && !this.isAtEnd()) this.consume();
 
     if (this.isAtEnd()) {
@@ -196,17 +184,17 @@ module.exports = class Scanner {
     return new Token(TokenType.STRING, literal);
   }
 
-  addToken(type: number): Token {
+  addToken(type) {
     const literal = this.input.substring(this.start, this.current);
     return new Token(type, literal);
   }
 
-  consume(): string {
+  consume() {
     this.current += 1;
     return this.input[this.current - 1];
   }
 
-  match(expected: string): bool {
+  match(expected) {
     if (this.isAtEnd()) return false;
     if (expected !== this.peek()) return false;
 
@@ -214,11 +202,11 @@ module.exports = class Scanner {
     return true;
   }
 
-  peek(): string {
+  peek() {
     return this.input[this.current];
   }
 
-  isAtEnd(): bool {
+  isAtEnd() {
     return this.current >= this.input.length;
   }
 };
