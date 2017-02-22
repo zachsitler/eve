@@ -8,7 +8,7 @@ function run(input) {
   const scanner = new Scanner(input);
   const parser = new Parser(scanner);
   const result = parser.parseProgram();
-  return eval(result);
+  return Eval(result).inspect();
 }
 
 function runFile(path) {
@@ -26,7 +26,7 @@ function runPrompt() {
   rl.prompt();
 
   rl.on('line', (line) => {
-    run(line);
+    rl.output.write(`${run(line)}\n`);
     rl.prompt();
   });
 
