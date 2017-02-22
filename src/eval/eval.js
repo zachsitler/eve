@@ -26,7 +26,7 @@ function evalPrefixExpression(op, right) {
     case '-':
       return evalMinusPrefix(right);
     default:
-      return null;
+      return new Obj('Null', null);
   }
 }
 

@@ -13,7 +13,7 @@ const runTests = (tests) => {
 }
 
 describe('Eval', () => {
-  it('handles numbers', () => {
+  test('numbers', () => {
     const tests = [
       {input: '1', expected: 1},
       {input: '5', expected: 5},
@@ -23,7 +23,7 @@ describe('Eval', () => {
     runTests(tests);
   });
 
-  it('handles strings', () => {
+  test('strings', () => {
     const tests = [
       {input: '\'eve\'', expected: 'eve'},
       {input: '\'hello, world\'', expected: 'hello, world'},
@@ -32,7 +32,7 @@ describe('Eval', () => {
     runTests(tests);
   });
 
-  it('handles booleans', () => {
+  test('booleans', () => {
     const tests = [
       {input: 'true', expected: true},
       {input: 'false', expected: false},
@@ -41,7 +41,7 @@ describe('Eval', () => {
     runTests(tests);
   });
 
-  it('handles null', () => {
+  test('null', () => {
     const tests = [
       {input: 'null', expected: null},
     ];
@@ -49,29 +49,27 @@ describe('Eval', () => {
     runTests(tests);
   });
 
-  describe('expressions', () => {
-    it('handles bangs operators', () => {
-      const tests = [
-        {input: '!true', expected: false},
-        {input: '!false', expected: true},
-        {input: '!2', expected: false},
-        {input: '!!true', expected: true},
-        {input: '!!false', expected: false},
-        {input: '!!2', expected: true},
-      ];
+  test('bang op', () => {
+    const tests = [
+      {input: '!true', expected: false},
+      {input: '!false', expected: true},
+      {input: '!2', expected: false},
+      {input: '!!true', expected: true},
+      {input: '!!false', expected: false},
+      {input: '!!2', expected: true},
+    ];
 
-      runTests(tests);
-    });
+    runTests(tests);
+  });
 
-    it('handles minus operators', () => {
-      const tests = [
-        {input: '1', expected: 1},
-        {input: '10', expected: 10},
-        {input: '-1', expected: -1},
-        {input: '-10', expected: -10},
-      ];
+  test('prefix minus op', () => {
+    const tests = [
+      {input: '1', expected: 1},
+      {input: '10', expected: 10},
+      {input: '-1', expected: -1},
+      {input: '-10', expected: -10},
+    ];
 
-      runTests(tests);
-    });
+    runTests(tests);
   });
 });
