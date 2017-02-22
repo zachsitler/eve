@@ -423,7 +423,7 @@ module.exports = class Parser {
     return LOWEST;
   }
 
-  getPrecedence(): number {
+  getPrecedence() {
     const precedence = precedences[this.tok.type];
     if (precedence) return precedence;
 

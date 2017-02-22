@@ -43,7 +43,7 @@ class TokenType {
  * A token is used to represent a lexical token.
  */
 class Token {
-  constructor(type: number, literal: string) {
+  constructor(type, literal) {
     this.type = type;
     this.literal = literal;
   }
