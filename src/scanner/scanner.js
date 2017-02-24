@@ -64,7 +64,6 @@ module.exports = class Scanner {
       switch (ch) {
         case '+': return this.addToken(TokenType.PLUS);
         case '-': return this.addToken(TokenType.MINUS);
-        case '/': return this.addToken(TokenType.SLASH);
         case '*': return this.addToken(TokenType.STAR);
         case ';': return this.addToken(TokenType.SEMICOLON);
         case ':': return this.addToken(TokenType.COLON);
@@ -78,29 +77,33 @@ module.exports = class Scanner {
         case '=':
           if (this.match('=')) {
             return this.addToken(TokenType.EQUAL_EQUAL);
+          } else {
+            return this.addToken(TokenType.EQUAL);
           }
-          return this.addToken(TokenType.EQUAL);
 
 
         case '!':
           if (this.match('=')) {
             return this.addToken(TokenType.BANG_EQUAL);
+          } else {
+            return this.addToken(TokenType.BANG);
           }
-          return this.addToken(TokenType.BANG);
 
 
         case '<':
           if (this.match('=')) {
             return this.addToken(TokenType.LESS_EQUAL);
+          } else {
+            return this.addToken(TokenType.LESS);
           }
-          return this.addToken(TokenType.LESS);
 
 
         case '>':
           if (this.match('=')) {
             return this.addToken(TokenType.GREATER_EQUAL);
+          } else {
+            return this.addToken(TokenType.GREATER);
           }
-          return this.addToken(TokenType.GREATER);
 
 
         case "'":
@@ -113,6 +116,14 @@ module.exports = class Scanner {
         case '\r':
           this.start = this.current;
           break;
+
+        case '/':
+          if (this.match('/')) {
+            this.skipComment();
+            break;
+          } else {
+            return this.addToken(TokenType.SLASH);
+          }
 
         default:
           if (Scanner.isDigit(ch)) {
@@ -149,7 +160,9 @@ module.exports = class Scanner {
    *   `_Some_Ridiculous_Var_Name_1234_`
    */
   scanIdentifier() {
-    while (Scanner.isLetter(this.peek()) || Scanner.isDigit(this.peek())) { this.consume(); }
+    while (Scanner.isLetter(this.peek()) || Scanner.isDigit(this.peek())) {
+      this.consume();
+    }
 
     const token = this.input.substring(this.start, this.current);
     const tokenType = Scanner.reservedWords[token];
@@ -182,6 +195,10 @@ module.exports = class Scanner {
     // Strip the quotes.
     const literal = this.input.substring(this.start + 1, this.current - 1);
     return new Token(TokenType.STRING, literal);
+  }
+
+  skipComment() {
+    while (this.peek() !== '\n' && !this.isAtEnd()) this.consume();
   }
 
   addToken(type) {

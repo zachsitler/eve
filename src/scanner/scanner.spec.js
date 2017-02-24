@@ -114,5 +114,15 @@ describe('Scanner', () => {
       expect(token.type).toBe(TokenType.NUMBER);
       expect(token.literal).toBe('1');
     });
+
+    it('skips comments', () => {
+      const scanner = new Scanner('1 // some amazing comment');
+      const number = scanner.scanToken();
+      const eof = scanner.scanToken();
+      expect(number.type).toBe(TokenType.NUMBER);
+      expect(number.literal).toBe('1');
+      expect(eof.type).toBe(TokenType.EOF);
+      expect(eof.literal).toBe('\0');
+    });
   });
 });
