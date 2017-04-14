@@ -1,0 +1,6 @@
+print(!true); // expect: false
+print(!false); // expect: true
+print(!2); // expect: false
+print(!!true); // expect: true
+print(!!false); // expect: false
+print(!!2); // expect: true

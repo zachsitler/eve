@@ -26,8 +26,8 @@ module.exports = class Scanner {
     while: TokenType.WHILE,
     true: TokenType.TRUE,
     false: TokenType.FALSE,
-    null: TokenType.NULL
-  }
+    null: TokenType.NULL,
+  };
 
   constructor(input) {
     this.input = input;
@@ -62,53 +62,60 @@ module.exports = class Scanner {
       const ch = this.consume();
 
       switch (ch) {
-        case '+': return this.addToken(TokenType.PLUS);
-        case '-': return this.addToken(TokenType.MINUS);
-        case '*': return this.addToken(TokenType.STAR);
-        case ';': return this.addToken(TokenType.SEMICOLON);
-        case ':': return this.addToken(TokenType.COLON);
-        case ',': return this.addToken(TokenType.COMMA);
-        case '[': return this.addToken(TokenType.LEFT_BRACKET);
-        case ']': return this.addToken(TokenType.RIGHT_BRACKET);
-        case '{': return this.addToken(TokenType.LEFT_BRACE);
-        case '}': return this.addToken(TokenType.RIGHT_BRACE);
-        case '(': return this.addToken(TokenType.LEFT_PAREN);
-        case ')': return this.addToken(TokenType.RIGHT_PAREN);
+        case '+':
+          return this.addToken(TokenType.PLUS);
+        case '-':
+          return this.addToken(TokenType.MINUS);
+        case '*':
+          return this.addToken(TokenType.STAR);
+        case ';':
+          return this.addToken(TokenType.SEMICOLON);
+        case ':':
+          return this.addToken(TokenType.COLON);
+        case ',':
+          return this.addToken(TokenType.COMMA);
+        case '[':
+          return this.addToken(TokenType.LEFT_BRACKET);
+        case ']':
+          return this.addToken(TokenType.RIGHT_BRACKET);
+        case '{':
+          return this.addToken(TokenType.LEFT_BRACE);
+        case '}':
+          return this.addToken(TokenType.RIGHT_BRACE);
+        case '(':
+          return this.addToken(TokenType.LEFT_PAREN);
+        case ')':
+          return this.addToken(TokenType.RIGHT_PAREN);
         case '=':
           if (this.match('=')) {
             return this.addToken(TokenType.EQUAL_EQUAL);
-          } else {
-            return this.addToken(TokenType.EQUAL);
           }
+          return this.addToken(TokenType.EQUAL);
 
 
         case '!':
           if (this.match('=')) {
             return this.addToken(TokenType.BANG_EQUAL);
-          } else {
-            return this.addToken(TokenType.BANG);
           }
+          return this.addToken(TokenType.BANG);
 
 
         case '<':
           if (this.match('=')) {
             return this.addToken(TokenType.LESS_EQUAL);
-          } else {
-            return this.addToken(TokenType.LESS);
           }
+          return this.addToken(TokenType.LESS);
 
 
         case '>':
           if (this.match('=')) {
             return this.addToken(TokenType.GREATER_EQUAL);
-          } else {
-            return this.addToken(TokenType.GREATER);
           }
+          return this.addToken(TokenType.GREATER);
 
 
         case "'":
           return this.scanString();
-
         // Skip whitespace.
         case ' ':
         case '\n':
@@ -146,7 +153,7 @@ module.exports = class Scanner {
    *   `123.456`
    */
   scanNumber() {
-    while (Scanner.isDigit(this.peek()) || this.peek() === '.') this.consume();
+    while (Scanner.isDigit(this.peek()) || this.peek() === '.') { this.consume(); }
     return this.addToken(TokenType.NUMBER);
   }
 
@@ -184,7 +191,7 @@ module.exports = class Scanner {
    * TODO: Support interpolation and escaping.
    */
   scanString() {
-    while (this.peek() !== "'" && !this.isAtEnd()) this.consume();
+    while (this.peek() !== "'" && !this.isAtEnd()) { this.consume(); }
 
     if (this.isAtEnd()) {
       throw new Error('Syntax error: unterminated string');
@@ -198,7 +205,7 @@ module.exports = class Scanner {
   }
 
   skipComment() {
-    while (this.peek() !== '\n' && !this.isAtEnd()) this.consume();
+    while (this.peek() !== '\n' && !this.isAtEnd()) { this.consume(); }
   }
 
   addToken(type) {

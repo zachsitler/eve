@@ -2,12 +2,15 @@
   "name": "eve",
   "version": "1.0.0",
   "main": "index.js",
+  "bin": "./build/eve",
   "repository": {},
   "author": "Zach Sitler <zachsitler@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "lint": "eslint . --fix",
-    "test": "jest"
+    "build": "babel src -d build",
+    "format": "prettier --single-quote --trailing-comma es5 --write \"{src,test}/**/*.js\"",
+    "lint": "eslint .",
+    "test": "jest ./src/*"
   },
   "dependencies": {
     "jest": "^18.1.0"
@@ -25,6 +28,7 @@
     "eslint-config-airbnb-base": "^11.0.1",
     "eslint-plugin-babel": "^4.0.1",
     "eslint-plugin-import": "^2.2.0",
-    "eslint-plugin-jest": "^1.0.2"
+    "eslint-plugin-jest": "^1.0.2",
+    "prettier": "^1.0.2"
   }
 }

@@ -1,5 +1,4 @@
-const { Scanner } = require('../scanner');
-const { Token, TokenType } = require('../token');
+const { TokenType } = require('../token');
 
 // Precedences.
 const LOWEST = 0; // a, 'foo', 1
@@ -8,6 +7,8 @@ const CONDITIONAL = 2; // >, <, ==, ..
 const SUM = 3; // +, -
 const PRODUCT = 4; // *, /
 const PREFIX = 5; // -a, !a
+const CALL = 6; // -a, !a
+const INDEX = 7; // array[1]
 
 // TODO: Use the precedence values above.
 const precedences = {
@@ -22,6 +23,8 @@ const precedences = {
   [TokenType.EQUAL_EQUAL]: CONDITIONAL,
   [TokenType.BANG_EQUAL]: CONDITIONAL,
   [TokenType.EQUAL]: ASSIGNMENT,
+  [TokenType.LEFT_PAREN]: CALL,
+  [TokenType.LEFT_BRACKET]: INDEX,
 };
 
 module.exports = class Parser {
@@ -42,12 +45,17 @@ module.exports = class Parser {
     this.register(TokenType.FALSE, this.parseBoolean);
     this.register(TokenType.NULL, this.parseNull);
     this.register(TokenType.LEFT_PAREN, this.parseGroupExpression);
+    this.register(TokenType.FN, this.parseFunction);
+    this.register(TokenType.LEFT_BRACKET, this.parseArray);
     this.registerInfix(TokenType.EQUAL, this.parseAssignmentExpression);
+    this.registerInfix(TokenType.LEFT_PAREN, this.parseCallExpression);
+    this.registerInfix(TokenType.LEFT_BRACKET, this.parseIndexExpression);
 
     this.prefix(TokenType.MINUS);
     this.prefix(TokenType.PLUS);
     this.prefix(TokenType.BANG);
 
+    this.infix(TokenType.MINUS);
     this.infix(TokenType.PLUS);
     this.infix(TokenType.STAR);
     this.infix(TokenType.SLASH);
@@ -82,8 +90,9 @@ module.exports = class Parser {
     };
 
     while (this.tok.type !== TokenType.EOF) {
-      let stmt = this.parseStatement();
-      if (stmt) ast.statements.push(stmt)
+      const stmt = this.parseStatement();
+      if (stmt) ast.statements.push(stmt);
+      this.nextToken();
     }
 
     return ast;
@@ -113,23 +122,22 @@ module.exports = class Parser {
       condition: this.parseExpression(),
       toString() {
         let str = `if (${this.condition.toString()})`;
-        str += ` ${this.thenArm.toString()}`
-        if (this.elseArm) str += ` else ${this.elseArm.toString()}`
+        str += ` ${this.thenArm.toString()}`;
+        if (this.elseArm) str += ` else ${this.elseArm.toString()}`;
         return str;
-      }
+      },
     };
 
-    // consume )
-    if (this.tok.type === TokenType.RIGHT_PAREN) {
-      this.nextToken();
+    if (!this.match(TokenType.RIGHT_PAREN)) {
+      return null;
     }
 
     ifStatement.thenArm = this.parseStatement();
 
-    if (this.tok.type === TokenType.ELSE) {
-      // consume else
+    if (this.expect(TokenType.ELSE)) {
       this.nextToken();
       ifStatement.elseArm = this.parseStatement();
+      this.match(TokenType.RIGHT_BRACE);
     }
 
     return ifStatement;
@@ -144,16 +152,14 @@ module.exports = class Parser {
       statements: [],
       toString() {
         return `{ ${this.statements.map(stmt => stmt.toString()).join('')} }`;
-      }
+      },
     };
 
     while (this.tok.type !== TokenType.RIGHT_BRACE) {
       const statement = this.parseStatement();
-      if (statement) blockStatement.statements.push(statement)
+      if (statement) blockStatement.statements.push(statement);
+      this.nextToken();
     }
-
-    // consume closing }
-    this.nextToken();
 
     return blockStatement;
   }
@@ -169,7 +175,7 @@ module.exports = class Parser {
         let str = `let ${this.name.toString()}`;
         if (this.value) str += ` = ${this.value.toString()}`;
         return `${str};`;
-      }
+      },
     };
 
     if (this.isPeekToken(TokenType.EQUAL)) {
@@ -181,8 +187,7 @@ module.exports = class Parser {
       statement.value = this.parseExpression();
     }
 
-    this.nextToken();
-    if (this.isCurToken(TokenType.SEMICOLON)) {
+    if (this.isPeekToken(TokenType.SEMICOLON)) {
       this.nextToken();
     }
 
@@ -196,12 +201,11 @@ module.exports = class Parser {
       type: 'ReturnStatement',
       expression: this.parseExpression(),
       toString() {
-        return `return ${this.expression.toString()};`
-      }
+        return `return ${this.expression.toString()};`;
+      },
     };
 
-    this.nextToken();
-    if (this.isCurToken(TokenType.SEMICOLON)) {
+    if (this.isPeekToken(TokenType.SEMICOLON)) {
       this.nextToken();
     }
 
@@ -213,12 +217,11 @@ module.exports = class Parser {
       type: 'ExpressionStatement',
       expression: this.parseExpression(),
       toString() {
-        return `${this.expression.toString()};`
-      }
+        return `${this.expression.toString()};`;
+      },
     };
 
-    this.nextToken();
-    if (this.isCurToken(TokenType.SEMICOLON)) {
+    if (this.isPeekToken(TokenType.SEMICOLON)) {
       this.nextToken();
     }
 
@@ -234,7 +237,10 @@ module.exports = class Parser {
 
     let left = prefix();
 
-    while (precedence < this.peekPrecedence()) {
+    while (
+      !this.isPeekToken(TokenType.SEMI_COLON) &&
+      precedence < this.peekPrecedence()
+    ) {
       const infix = this.infixParsers[this.peek.type];
       if (!infix) return left;
 
@@ -280,7 +286,7 @@ module.exports = class Parser {
   }
 
   parseAssignmentExpression(left) {
-    const expression = {
+    const expr = {
       type: 'AssignmentExpression',
       op: this.tok.literal,
       left,
@@ -290,9 +296,66 @@ module.exports = class Parser {
     };
 
     this.nextToken();
-    expression.right = this.parseExpression();
+    expr.right = this.parseExpression();
 
-    return expression;
+    return expr;
+  }
+
+  parseIndexExpression(left) {
+    const expr = {
+      type: 'IndexExpression',
+      left,
+      toString() {
+        return `${this.left.toString()}[${this.index.toString()}]`;
+      },
+    };
+
+    this.nextToken();
+
+    expr.index = this.parseExpression();
+
+    if (!this.expect(TokenType.RIGHT_BRACKET)) {
+      return null;
+    }
+
+    return expr;
+  }
+
+  parseCallExpression(fn) {
+    return {
+      type: 'CallExpression',
+      fn,
+      args: this.parseExpressionList(TokenType.RIGHT_PAREN),
+      toString() {
+        return `${this.fn}(${this.args.map(arg => arg.toString()).join(', ')})`;
+      },
+    };
+  }
+
+  parseExpressionList(end) {
+    const args = [];
+
+    if (this.isPeekToken(end)) {
+      this.nextToken();
+      return args;
+    }
+
+    this.nextToken();
+    args.push(this.parseExpression());
+
+    while (this.isPeekToken(TokenType.COMMA)) {
+      this.nextToken();
+      this.nextToken();
+      args.push(this.parseExpression());
+    }
+
+    if (!this.isPeekToken(end)) {
+      return null;
+    }
+
+    this.nextToken();
+
+    return args;
   }
 
   parseGroupExpression() {
@@ -317,8 +380,8 @@ module.exports = class Parser {
       body: [],
       toString() {
         return `(${this.body.map(ident => ident.toString()).join(', ')})`;
-      }
-    }
+      },
+    };
 
     while (this.tok.type !== TokenType.RIGHT_PAREN) {
       parameters.body.push(this.parseIdentifier());
@@ -351,6 +414,18 @@ module.exports = class Parser {
     fn.body = this.parseBlockStatement();
 
     return fn;
+  }
+
+  parseArray() {
+    const array = {
+      type: 'Array',
+      elements: this.parseExpressionList(TokenType.RIGHT_BRACKET),
+      toString() {
+        return `[${this.elements.map(elem => elem.toString()).join(', ')}]`;
+      },
+    };
+
+    return array;
   }
 
   parseIdentifier() {
@@ -401,6 +476,22 @@ module.exports = class Parser {
         return `'${this.value}'`;
       },
     };
+  }
+
+  match(type) {
+    if (this.isCurToken(type)) {
+      this.nextToken();
+      return true;
+    }
+    return false;
+  }
+
+  expect(type) {
+    if (this.isPeekToken(type)) {
+      this.nextToken();
+      return true;
+    }
+    return false;
   }
 
   isPeekToken(type) {

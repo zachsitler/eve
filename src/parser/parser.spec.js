@@ -1,76 +1,101 @@
 const Parser = require('./parser');
 const { Scanner } = require('../scanner');
 
+const runTests = (tests) => {
+  tests.forEach(({ input, expected }) => {
+    const scanner = new Scanner(input);
+    const parser = new Parser(scanner);
+    const actual = parser.parseExpression();
+    expect(actual.toString()).toBe(expected);
+  });
+};
+
 describe('Parser', () => {
   describe('parseIfStatement()', () => {
     it('works', () => {
-      const scanner = new Scanner(`
+      const scanner = new Scanner(
+        `
         if (x >= 0)
           return true;
         else
           return false;
-      `);
+      `,
+      );
       const parser = new Parser(scanner);
       const actual = parser.parseIfStatement();
       expect(actual.type).toBe('IfStatement');
-      expect(actual.toString().replace(/\s/g, '')).toBe(`
+      expect(actual.toString().replace(/\s/g, '')).toBe(
+        `
         if ((x >= 0))
           return true;
         else
           return false;
-      `.replace(/\s/g, ''));
+      `.replace(/\s/g, ''),
+      );
     });
 
     it('handles nested blocks', () => {
-      const scanner = new Scanner(`
+      const scanner = new Scanner(
+        `
         if (x >= 0)
           if (y >= 0)
             if (z >= 0)
               return true;
-      `);
+      `,
+      );
       const parser = new Parser(scanner);
       const actual = parser.parseIfStatement();
       expect(actual.type).toBe('IfStatement');
-      expect(actual.toString().replace(/\s/g, '')).toBe(`
+      expect(actual.toString().replace(/\s/g, '')).toBe(
+        `
         if ((x >= 0))
           if ((y >= 0))
             if ((z >= 0))
               return true;
-      `.replace(/\s/g, ''));
+      `.replace(/\s/g, ''),
+      );
     });
   });
 
   describe('parseBlockStatement()', () => {
     it('works', () => {
-      const scanner = new Scanner(`
+      const scanner = new Scanner(
+        `
         {
           let language = 'eve';
           let version = 1.2;
           return language + '@' + version;
         }
-      `);
+      `,
+      );
       const parser = new Parser(scanner);
       const actual = parser.parseBlockStatement();
       expect(actual.type).toBe('BlockStatement');
-      expect(actual.toString().replace(/\s/g, '')).toBe(`
+      expect(actual.toString().replace(/\s/g, '')).toBe(
+        `
         {
           let language = 'eve';
           let version = 1.2;
           return ((language + '@') + version);
         }
-      `.replace(/\s/g, ''));
+      `.replace(/\s/g, ''),
+      );
     });
 
     it('handles nested statements', () => {
-      const scanner = new Scanner(`
+      const scanner = new Scanner(
+        `
         {{return language + '@' + version;}}
-      `);
+      `,
+      );
       const parser = new Parser(scanner);
       const actual = parser.parseBlockStatement();
       expect(actual.type).toBe('BlockStatement');
-      expect(actual.toString().replace(/\s/g, '')).toBe(`
+      expect(actual.toString().replace(/\s/g, '')).toBe(
+        `
         {{return ((language + '@') + version);}}
-      `.replace(/\s/g, ''));
+      `.replace(/\s/g, ''),
+      );
     });
   });
 
@@ -113,7 +138,7 @@ describe('Parser', () => {
   });
 
   describe('parseIdentifier()', () => {
-    it('parses \'a\' correctly', () => {
+    it("parses 'a' correctly", () => {
       const scanner = new Scanner('a');
       const parser = new Parser(scanner);
       const actual = parser.parseIdentifier();
@@ -121,7 +146,7 @@ describe('Parser', () => {
       expect(actual.value).toBe('a');
     });
 
-    it('parses \'_a123\' correctly', () => {
+    it("parses '_a123' correctly", () => {
       const scanner = new Scanner('_a123');
       const parser = new Parser(scanner);
       const actual = parser.parseIdentifier();
@@ -131,21 +156,21 @@ describe('Parser', () => {
   });
 
   describe('parsePrefixExpression()', () => {
-    it('parses \'-a\' correctly', () => {
+    it("parses '-a' correctly", () => {
       const scanner = new Scanner('-a');
       const parser = new Parser(scanner);
       const actual = parser.parseExpression();
       expect(actual.toString()).toBe('(-a)');
     });
 
-    it('parses \'---a\' correctly', () => {
+    it("parses '---a' correctly", () => {
       const scanner = new Scanner('---a');
       const parser = new Parser(scanner);
       const actual = parser.parseExpression();
       expect(actual.toString()).toBe('(-(-(-a)))');
     });
 
-    it('parses \'!a\' correctly', () => {
+    it("parses '!a' correctly", () => {
       const scanner = new Scanner('!a');
       const parser = new Parser(scanner);
       const actual = parser.parseExpression();
@@ -158,6 +183,7 @@ describe('Parser', () => {
       const tests = [
         { input: 'a + b', expected: '(a + b)' },
         { input: 'a + b + c', expected: '((a + b) + c)' },
+        { input: 'a + b + c - d', expected: '(((a + b) + c) - d)' },
         { input: 'a + b * c', expected: '(a + (b * c))' },
         { input: 'a / b * c', expected: '((a / b) * c)' },
         { input: 'a * b + c / d', expected: '((a * b) + (c / d))' },
@@ -179,38 +205,94 @@ describe('Parser', () => {
     });
   });
 
-  describe('parseAssignmentExpression()', () => {
-    it('works', () => {
-      const tests = [
-        { input: 'a = b', expected: '(a = b)' },
-        { input: 'a = a + 1', expected: '(a = (a + 1))' },
-        { input: 'a = b = c', expected: '(a = (b = c))' },
-      ];
+  test('parseAssignmentExpression()', () => {
+    const tests = [
+      { input: 'a = b', expected: '(a = b)' },
+      { input: 'a = a + 1', expected: '(a = (a + 1))' },
+      { input: 'a = b = c', expected: '(a = (b = c))' },
+      {
+        input: 'a = fn(x) { return x; }',
+        expected: '(a = fn(x) { return x; })',
+      },
+    ];
 
-      tests.forEach(({ input, expected }) => {
-        const scanner = new Scanner(input);
-        const parser = new Parser(scanner);
-        const actual = parser.parseExpression();
-        expect(actual.toString()).toBe(expected);
-      });
+    tests.forEach(({ input, expected }) => {
+      const scanner = new Scanner(input);
+      const parser = new Parser(scanner);
+      const actual = parser.parseExpression();
+      expect(actual.toString()).toBe(expected);
     });
   });
 
-  describe('parseGroupExpression()', () => {
-    it('works', () => {
-      const tests = [
-        { input: '(a + b) * c', expected: '((a + b) * c)' },
-        { input: '(a * (b + c) / d)', expected: '((a * (b + c)) / d)' },
-        { input: '(((a)))', expected: 'a' },
-      ];
+  test('parseCallExpression()', () => {
+    const tests = [
+      { input: 'a()', expected: 'a()' },
+      { input: 'a(b, c, d)', expected: 'a(b, c, d)' },
+      { input: 'a(!b, c + d, d * e)', expected: 'a((!b), (c + d), (d * e))' },
+    ];
 
-      tests.forEach(({ input, expected }) => {
-        const scanner = new Scanner(input);
-        const parser = new Parser(scanner);
-        const actual = parser.parseExpression();
-        expect(actual.toString()).toBe(expected);
-      });
+    tests.forEach(({ input, expected }) => {
+      const scanner = new Scanner(input);
+      const parser = new Parser(scanner);
+      const actual = parser.parseExpression();
+      expect(actual.toString()).toBe(expected);
     });
+  });
+
+  test('parseGroupExpression()', () => {
+    const tests = [
+      { input: '(a + b) * c', expected: '((a + b) * c)' },
+      { input: '(a * (b + c) / d)', expected: '((a * (b + c)) / d)' },
+      { input: '(((a)))', expected: 'a' },
+    ];
+
+    tests.forEach(({ input, expected }) => {
+      const scanner = new Scanner(input);
+      const parser = new Parser(scanner);
+      const actual = parser.parseExpression();
+      expect(actual.toString()).toBe(expected);
+    });
+  });
+
+  test('parseExpression()', () => {
+    const tests = [
+      { input: 'a()', expected: 'a()' },
+      { input: 'a(b)', expected: 'a(b)' },
+      { input: 'a(b, \'c\', 1 + 2)', expected: 'a(b, \'c\', (1 + 2))' },
+    ];
+
+    tests.forEach(({ input, expected }) => {
+      const scanner = new Scanner(input);
+      const parser = new Parser(scanner);
+      const actual = parser.parseExpression();
+      expect(actual.toString()).toBe(expected);
+    });
+  });
+
+  test('parseIndexExpression', () => {
+    const tests = [
+      { input: '[1, 2][3]', expected: '[1, 2][3]' },
+      { input: 'func()[3]', expected: 'func()[3]' },
+      { input: 'func()[3]', expected: 'func()[3]' },
+    ];
+
+    runTests(tests);
+  });
+
+  test('parseArray()', () => {
+    const tests = [
+      { input: '[1, 2, 3]', expected: '[1, 2, 3]' },
+      {
+        input: '[1 + 1, 2 * 2, 3 / 3]',
+        expected: '[(1 + 1), (2 * 2), (3 / 3)]',
+      },
+      {
+        input: '[\'foo\', fn(x) { return x; }, [1, 2, 3]]',
+        expected: '[\'foo\', fn(x) { return x; }, [1, 2, 3]]',
+      },
+    ];
+
+    runTests(tests);
   });
 
   describe('parseFunction()', () => {
@@ -232,7 +314,7 @@ describe('Parser', () => {
   });
 
   describe('parseNumber()', () => {
-    it('parses \'1\' correctly', () => {
+    it("parses '1' correctly", () => {
       const scanner = new Scanner('1');
       const parser = new Parser(scanner);
       const actual = parser.parseNumber();
@@ -240,7 +322,7 @@ describe('Parser', () => {
       expect(actual.value).toBe('1');
     });
 
-    it('parses \'1.2345\' correctly', () => {
+    it("parses '1.2345' correctly", () => {
       const scanner = new Scanner('1.2345');
       const parser = new Parser(scanner);
       const actual = parser.parseNumber();
@@ -250,8 +332,8 @@ describe('Parser', () => {
   });
 
   describe('parseString()', () => {
-    it('parses \'abc\' correctly', () => {
-      const scanner = new Scanner('\'abc\'');
+    it("parses 'abc' correctly", () => {
+      const scanner = new Scanner("'abc'");
       const parser = new Parser(scanner);
       const actual = parser.parseString();
       expect(actual.type).toBe('String');

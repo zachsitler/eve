@@ -2,18 +2,18 @@ const fs = require('fs');
 const readline = require('readline');
 const { Scanner } = require('./scanner');
 const { Parser } = require('./parser');
-const Eval = require('./eval');
+const { Eval, Environment } = require('./eval');
 
-function run(input) {
+function run(input, env) {
   const scanner = new Scanner(input);
   const parser = new Parser(scanner);
   const result = parser.parseProgram();
-  return Eval(result).inspect();
+  return Eval(result, env).inspect();
 }
 
 function runFile(path) {
   const contents = fs.readFileSync(path, 'utf8');
-  run(contents);
+  run(contents, new Environment());
 }
 
 function runPrompt() {
@@ -23,10 +23,12 @@ function runPrompt() {
     prompt: '> ',
   });
 
+  const env = new Environment();
+
   rl.prompt();
 
   rl.on('line', (line) => {
-    rl.output.write(`${run(line)}\n`);
+    rl.output.write(`${run(line, env)}\n`);
     rl.prompt();
   });
 
