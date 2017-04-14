@@ -47,6 +47,7 @@ module.exports = class Parser {
     this.register(TokenType.LEFT_PAREN, this.parseGroupExpression);
     this.register(TokenType.FN, this.parseFunction);
     this.register(TokenType.LEFT_BRACKET, this.parseArray);
+    this.register(TokenType.LEFT_BRACE, this.parseMap);
     this.registerInfix(TokenType.EQUAL, this.parseAssignmentExpression);
     this.registerInfix(TokenType.LEFT_PAREN, this.parseCallExpression);
     this.registerInfix(TokenType.LEFT_BRACKET, this.parseIndexExpression);
@@ -414,6 +415,41 @@ module.exports = class Parser {
     fn.body = this.parseBlockStatement();
 
     return fn;
+  }
+
+  parseMap() {
+    const map = {
+      type: 'map',
+      pairs: [],
+      toString() {
+        const keys = this.pairs
+          .map(([key, val]) => `${key.toString()}: ${val.toString()}`)
+          .join(', ');
+
+        return `{${keys}}`;
+      }
+    };
+
+    let pairIndex = 0;
+
+    while (!this.isPeekToken(TokenType.RIGHT_BRACE)) {
+      this.nextToken();
+      const key = this.parseExpression();
+
+      if (!this.expect(TokenType.COLON)) {
+        return null;
+      }
+
+      this.nextToken();
+      map.pairs[pairIndex] = [key, this.parseExpression()];
+      pairIndex += 1;
+
+      if (!this.isPeekToken(TokenType.RIGHT_BRACE) && !this.expect(TokenType.COMMA)) {
+        return null;
+      }
+    }
+
+    return map;
   }
 
   parseArray() {

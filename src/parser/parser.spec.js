@@ -279,6 +279,16 @@ describe('Parser', () => {
     runTests(tests);
   });
 
+  test('parseMap()', () => {
+    const tests = [
+      { input: `{'foo': 'bar'}`, expected: `{'foo': 'bar'}` },
+      { input: `{}`, expected: `{}` },
+      { input: `{'one': 2 - 1, 'two': 4 - 2, 'three': 3 * 5}`, expected: `{'one': (2 - 1), 'two': (4 - 2), 'three': (3 * 5)}` },
+    ];
+
+    runTests(tests);
+  });
+
   test('parseArray()', () => {
     const tests = [
       { input: '[1, 2, 3]', expected: '[1, 2, 3]' },
