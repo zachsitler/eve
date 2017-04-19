@@ -371,6 +371,9 @@ function Eval(node, env) {
 
       return new Eve.Array(elements);
 
+    case 'PropertyAccess':
+      return new Eve.String(node.value);
+
     case 'Identifier':
       return evalIdentifier(node, env);
 

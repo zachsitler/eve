@@ -188,6 +188,16 @@ describe('Eval', () => {
     runTests(tests);
   });
 
+  test('property access', () => {
+    const tests = [
+      { input: `let obj = {'foo': 'bar'}; obj.foo`, expected: 'bar' },
+      { input: `let obj = {'foo' + 'bar': true}; obj.foobar`, expected: true },
+      { input: `let obj = {'size': fn() { return 1 }}; obj.size()`, expected: 1 },
+    ];
+
+    runTests(tests);
+  });
+
   test('function statements', () => {
     const tests = [
       {

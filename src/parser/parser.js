@@ -8,7 +8,7 @@ const SUM = 3; // +, -
 const PRODUCT = 4; // *, /
 const PREFIX = 5; // -a, !a
 const CALL = 6; // -a, !a
-const INDEX = 7; // array[1]
+const INDEX = 7; // array[1], foo.length
 
 // TODO: Use the precedence values above.
 const precedences = {
@@ -25,6 +25,7 @@ const precedences = {
   [TokenType.EQUAL]: ASSIGNMENT,
   [TokenType.LEFT_PAREN]: CALL,
   [TokenType.LEFT_BRACKET]: INDEX,
+  [TokenType.PERIOD]: INDEX,
 };
 
 module.exports = class Parser {
@@ -51,6 +52,7 @@ module.exports = class Parser {
     this.registerInfix(TokenType.EQUAL, this.parseAssignmentExpression);
     this.registerInfix(TokenType.LEFT_PAREN, this.parseCallExpression);
     this.registerInfix(TokenType.LEFT_BRACKET, this.parseIndexExpression);
+    this.registerInfix(TokenType.PERIOD, this.parsePropertyAccess);
 
     this.prefix(TokenType.MINUS);
     this.prefix(TokenType.PLUS);
@@ -312,6 +314,39 @@ module.exports = class Parser {
     expr.right = this.parseExpression();
 
     return expr;
+  }
+
+  parsePropertyAccess(left) {
+    const expr = {
+      type: 'IndexExpression',
+      left,
+      toString() {
+        return `${this.left.toString()}.${this.index.toString()}`
+      }
+    };
+
+    this.nextToken();
+
+    expr.index = this.parseProperty();
+
+    return expr;
+  }
+
+  parseProperty() {
+    const property = {
+      type: 'PropertyAccess',
+      toString() {
+        return `${this.value.toString()}`;
+      }
+    };
+
+    // We only allow identifiers for a property access, e.g. foo.bar
+    if (!this.isCurToken(TokenType.IDENTIFIER)) {
+      throw new Error(`Syntax error: unexpected token ${this.tok.literal}`);
+    }
+
+    property.value = this.tok.literal;
+    return property
   }
 
   parseIndexExpression(left) {

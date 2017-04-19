@@ -72,6 +72,8 @@ module.exports = class Scanner {
           return this.addToken(TokenType.SEMICOLON);
         case ':':
           return this.addToken(TokenType.COLON);
+        case '.':
+          return this.addToken(TokenType.PERIOD);
         case ',':
           return this.addToken(TokenType.COMMA);
         case '[':

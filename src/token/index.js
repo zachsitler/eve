@@ -37,6 +37,7 @@ class TokenType {
   static TRUE = 31;
   static FALSE = 32;
   static NULL = 33;
+  static PERIOD = 34;
 }
 
 /*

@@ -66,6 +66,7 @@ describe('Scanner', () => {
         { input: ';', expected: { type: TokenType.SEMICOLON, literal: ';' } },
         { input: ':', expected: { type: TokenType.COLON, literal: ':' } },
         { input: ',', expected: { type: TokenType.COMMA, literal: ',' } },
+        { input: '.', expected: { type: TokenType.PERIOD, literal: '.' } },
         { input: '(', expected: { type: TokenType.LEFT_PAREN, literal: '(' } },
         { input: ')', expected: { type: TokenType.RIGHT_PAREN, literal: ')' } },
         {

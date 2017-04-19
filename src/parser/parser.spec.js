@@ -310,6 +310,18 @@ describe('Parser', () => {
       { input: '[1, 2][3]', expected: '[1, 2][3]' },
       { input: 'func()[3]', expected: 'func()[3]' },
       { input: 'func()[3]', expected: 'func()[3]' },
+      { input: `obj['foo']`, expected: `obj['foo']` },
+    ];
+
+    runTests(tests);
+  });
+
+  test('parsePropertyAccess', () => {
+    const tests = [
+      { input: 'foo.length', expected: 'foo.length' },
+      { input: `'foo'.length`, expected: `'foo'.length` },
+      { input: `[1, 2, 3].length`, expected: '[1, 2, 3].length' },
+      { input: `true.length`, expected: 'true.length' },
     ];
 
     runTests(tests);
