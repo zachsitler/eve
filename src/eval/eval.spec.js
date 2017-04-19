@@ -177,6 +177,12 @@ describe('Eval', () => {
       { input: '(fn(x) { return [x * x] })(2)[0]', expected: 4 },
       { input: '[1, 2, 3][3]', expected: null },
       { input: '[1, 2, 3][-1]', expected: null },
+      { input: `let obj = {'foo': 'bar'}; obj['foo'];`, expected: 'bar' },
+      { input: `let obj = {1 + 2: 3}; obj[1 + 2];`, expected: 3 },
+      {
+        input: `let obj = {true: 'foo'}; obj[(fn() { return true})()];`,
+        expected: 'foo',
+      },
     ];
 
     runTests(tests);

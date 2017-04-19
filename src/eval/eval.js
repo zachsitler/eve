@@ -76,7 +76,10 @@ function evalHash(node, env) {
 function evalIndexExpression(left, index) {
   if (left.type === 'Array' && index.type === 'Number') {
     return evalIndexArrayExpression(left, index);
+  } else if (left.type === 'Hash') {
+    return evalIndexHashExpression(left, index);
   }
+
   return new Eve.Error(`index operator not supported: ${left.type}`);
 }
 
@@ -89,6 +92,10 @@ function evalIndexArrayExpression(array, index) {
   }
 
   return array.elements[addr];
+}
+
+function evalIndexHashExpression(hash, index) {
+  return hash.pairs[index.inspect()];
 }
 
 function evalIdentifier(node, env) {
