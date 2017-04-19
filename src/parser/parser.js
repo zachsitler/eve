@@ -47,7 +47,7 @@ module.exports = class Parser {
     this.register(TokenType.LEFT_PAREN, this.parseGroupExpression);
     this.register(TokenType.FN, this.parseFunction);
     this.register(TokenType.LEFT_BRACKET, this.parseArray);
-    this.register(TokenType.LEFT_BRACE, this.parseMap);
+    this.register(TokenType.LEFT_BRACE, this.parseHash);
     this.registerInfix(TokenType.EQUAL, this.parseAssignmentExpression);
     this.registerInfix(TokenType.LEFT_PAREN, this.parseCallExpression);
     this.registerInfix(TokenType.LEFT_BRACKET, this.parseIndexExpression);
@@ -107,11 +107,23 @@ module.exports = class Parser {
         return this.parseLetStatement();
       case TokenType.RETURN:
         return this.parseReturnStatement();
-      case TokenType.LEFT_BRACE:
-        return this.parseBlockStatement();
       default:
         return this.parseExpressionStatement();
     }
+  }
+
+  /**
+   * Due to ambiguity between block statements/objects, this function tells
+   * the parser to prefer a block statement if the next token is a LEFT_BRACE.
+   *
+   * @return AstNode
+   */
+  parseBlockOrStatement() {
+    if (this.isCurToken(TokenType.LEFT_BRACE)) {
+      return this.parseBlockStatement();
+    }
+
+    return this.parseStatement();
   }
 
   parseIfStatement() {
@@ -133,11 +145,11 @@ module.exports = class Parser {
       return null;
     }
 
-    ifStatement.thenArm = this.parseStatement();
+    ifStatement.thenArm = this.parseBlockOrStatement();
 
     if (this.expect(TokenType.ELSE)) {
       this.nextToken();
-      ifStatement.elseArm = this.parseStatement();
+      ifStatement.elseArm = this.parseBlockOrStatement();
       this.match(TokenType.RIGHT_BRACE);
     }
 
@@ -417,9 +429,9 @@ module.exports = class Parser {
     return fn;
   }
 
-  parseMap() {
-    const map = {
-      type: 'map',
+  parseHash() {
+    const hash = {
+      type: 'Hash',
       pairs: [],
       toString() {
         const keys = this.pairs
@@ -427,7 +439,7 @@ module.exports = class Parser {
           .join(', ');
 
         return `{${keys}}`;
-      }
+      },
     };
 
     let pairIndex = 0;
@@ -441,15 +453,21 @@ module.exports = class Parser {
       }
 
       this.nextToken();
-      map.pairs[pairIndex] = [key, this.parseExpression()];
+      hash.pairs[pairIndex] = [key, this.parseExpression()];
       pairIndex += 1;
 
-      if (!this.isPeekToken(TokenType.RIGHT_BRACE) && !this.expect(TokenType.COMMA)) {
+      if (
+        !this.isPeekToken(TokenType.RIGHT_BRACE) &&
+        !this.expect(TokenType.COMMA)
+      ) {
         return null;
       }
     }
 
-    return map;
+    // Advance past the last expression
+    this.nextToken();
+
+    return hash;
   }
 
   parseArray() {

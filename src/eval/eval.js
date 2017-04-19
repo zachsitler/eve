@@ -51,6 +51,28 @@ function applyFunction(fn, args) {
   return unwrapResult(result);
 }
 
+function evalHash(node, env) {
+  const pairs = {};
+
+  for (let i = 0; i < node.pairs.length; i++) {
+    const [key, val] = node.pairs[i];
+
+    const evalKey = Eval(key, env);
+    if (isError(key)) {
+      return key;
+    }
+
+    const evalVal = Eval(val, env);
+    if (isError(evalVal)) {
+      return evalVal;
+    }
+
+    pairs[evalKey.value] = evalVal;
+  }
+
+  return new Eve.Hash(pairs);
+}
+
 function evalIndexExpression(left, index) {
   if (left.type === 'Array' && index.type === 'Number') {
     return evalIndexArrayExpression(left, index);
@@ -217,7 +239,7 @@ function evalIntegerInfixExpression(op, left, right) {
       return new Eve.Boolean(leftVal !== rightVal);
     default:
       return new Eve.Error(
-        `unknown operator: ${left.type} ${op} ${right.type}`,
+        `unknown operator: ${left.type} ${op} ${right.type}`
       );
   }
 }
@@ -329,6 +351,9 @@ function Eval(node, env) {
 
       return evalInfixExpression(node.op, left, right);
     }
+
+    case 'Hash':
+      return evalHash(node, env);
 
     case 'Array':
       const elements = evalExpressions(node.elements, env);

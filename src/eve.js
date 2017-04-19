@@ -27,7 +27,7 @@ function runPrompt() {
 
   rl.prompt();
 
-  rl.on('line', (line) => {
+  rl.on('line', line => {
     rl.output.write(`${run(line, env)}\n`);
     rl.prompt();
   });

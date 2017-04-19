@@ -61,6 +61,24 @@ class EveError {
   }
 }
 
+class EveHash {
+  constructor(pairs) {
+    this.type = 'Hash';
+    this.pairs = pairs;
+  }
+
+  inspect() {
+    const pairs = Object.keys(this.pairs)
+      .map(key => {
+        const val = this.pairs[key];
+        return `${key}: ${val.inspect()}`;
+      })
+      .join(',');
+
+    return `{${pairs}}`;
+  }
+}
+
 class EveFunction extends EveObject {
   constructor(params, body, env) {
     super();
@@ -84,5 +102,6 @@ module.exports = {
   Number: EveNumber,
   Return: EveReturn,
   Array: EveArray,
+  Hash: EveHash,
   Function: EveFunction,
 };

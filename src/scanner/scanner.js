@@ -92,13 +92,11 @@ module.exports = class Scanner {
           }
           return this.addToken(TokenType.EQUAL);
 
-
         case '!':
           if (this.match('=')) {
             return this.addToken(TokenType.BANG_EQUAL);
           }
           return this.addToken(TokenType.BANG);
-
 
         case '<':
           if (this.match('=')) {
@@ -106,13 +104,11 @@ module.exports = class Scanner {
           }
           return this.addToken(TokenType.LESS);
 
-
         case '>':
           if (this.match('=')) {
             return this.addToken(TokenType.GREATER_EQUAL);
           }
           return this.addToken(TokenType.GREATER);
-
 
         case "'":
           return this.scanString();
@@ -153,7 +149,9 @@ module.exports = class Scanner {
    *   `123.456`
    */
   scanNumber() {
-    while (Scanner.isDigit(this.peek()) || this.peek() === '.') { this.consume(); }
+    while (Scanner.isDigit(this.peek()) || this.peek() === '.') {
+      this.consume();
+    }
     return this.addToken(TokenType.NUMBER);
   }
 
@@ -191,7 +189,9 @@ module.exports = class Scanner {
    * TODO: Support interpolation and escaping.
    */
   scanString() {
-    while (this.peek() !== "'" && !this.isAtEnd()) { this.consume(); }
+    while (this.peek() !== "'" && !this.isAtEnd()) {
+      this.consume();
+    }
 
     if (this.isAtEnd()) {
       throw new Error('Syntax error: unterminated string');
@@ -205,7 +205,9 @@ module.exports = class Scanner {
   }
 
   skipComment() {
-    while (this.peek() !== '\n' && !this.isAtEnd()) { this.consume(); }
+    while (this.peek() !== '\n' && !this.isAtEnd()) {
+      this.consume();
+    }
   }
 
   addToken(type) {

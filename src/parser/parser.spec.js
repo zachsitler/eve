@@ -1,7 +1,7 @@
 const Parser = require('./parser');
 const { Scanner } = require('../scanner');
 
-const runTests = (tests) => {
+const runTests = tests => {
   tests.forEach(({ input, expected }) => {
     const scanner = new Scanner(input);
     const parser = new Parser(scanner);
@@ -19,7 +19,7 @@ describe('Parser', () => {
           return true;
         else
           return false;
-      `,
+      `
       );
       const parser = new Parser(scanner);
       const actual = parser.parseIfStatement();
@@ -30,7 +30,7 @@ describe('Parser', () => {
           return true;
         else
           return false;
-      `.replace(/\s/g, ''),
+      `.replace(/\s/g, '')
       );
     });
 
@@ -41,7 +41,7 @@ describe('Parser', () => {
           if (y >= 0)
             if (z >= 0)
               return true;
-      `,
+      `
       );
       const parser = new Parser(scanner);
       const actual = parser.parseIfStatement();
@@ -52,7 +52,59 @@ describe('Parser', () => {
           if ((y >= 0))
             if ((z >= 0))
               return true;
-      `.replace(/\s/g, ''),
+      `.replace(/\s/g, '')
+      );
+    });
+
+    it('works with block statements', () => {
+      const scanner = new Scanner(
+        `
+        if (x >= 0) {
+          return true;
+        } else {
+          return false;
+        }
+      `
+      );
+      const parser = new Parser(scanner);
+      const actual = parser.parseIfStatement();
+      expect(actual.type).toBe('IfStatement');
+      expect(actual.toString().replace(/\s/g, '')).toBe(
+        `
+        if ((x >= 0)) {
+          return true;
+        } else {
+          return false;
+        }
+      `.replace(/\s/g, '')
+      );
+    });
+
+    it('works with nested block statements', () => {
+      const scanner = new Scanner(
+        `
+        if (true) {
+          if (true) {
+            if (true) {
+              return true;
+            }
+          }
+        }
+      `
+      );
+      const parser = new Parser(scanner);
+      const actual = parser.parseIfStatement();
+      expect(actual.type).toBe('IfStatement');
+      expect(actual.toString().replace(/\s/g, '')).toBe(
+        `
+        if (true) {
+          if (true) {
+            if (true) {
+              return true;
+            }
+          }
+        }
+      `.replace(/\s/g, '')
       );
     });
   });
@@ -66,7 +118,7 @@ describe('Parser', () => {
           let version = 1.2;
           return language + '@' + version;
         }
-      `,
+      `
       );
       const parser = new Parser(scanner);
       const actual = parser.parseBlockStatement();
@@ -78,23 +130,7 @@ describe('Parser', () => {
           let version = 1.2;
           return ((language + '@') + version);
         }
-      `.replace(/\s/g, ''),
-      );
-    });
-
-    it('handles nested statements', () => {
-      const scanner = new Scanner(
-        `
-        {{return language + '@' + version;}}
-      `,
-      );
-      const parser = new Parser(scanner);
-      const actual = parser.parseBlockStatement();
-      expect(actual.type).toBe('BlockStatement');
-      expect(actual.toString().replace(/\s/g, '')).toBe(
-        `
-        {{return ((language + '@') + version);}}
-      `.replace(/\s/g, ''),
+      `.replace(/\s/g, '')
       );
     });
   });
@@ -258,7 +294,7 @@ describe('Parser', () => {
     const tests = [
       { input: 'a()', expected: 'a()' },
       { input: 'a(b)', expected: 'a(b)' },
-      { input: 'a(b, \'c\', 1 + 2)', expected: 'a(b, \'c\', (1 + 2))' },
+      { input: "a(b, 'c', 1 + 2)", expected: "a(b, 'c', (1 + 2))" },
     ];
 
     tests.forEach(({ input, expected }) => {
@@ -279,11 +315,15 @@ describe('Parser', () => {
     runTests(tests);
   });
 
-  test('parseMap()', () => {
+  test('parseHash()', () => {
     const tests = [
       { input: `{'foo': 'bar'}`, expected: `{'foo': 'bar'}` },
       { input: `{}`, expected: `{}` },
-      { input: `{'one': 2 - 1, 'two': 4 - 2, 'three': 3 * 5}`, expected: `{'one': (2 - 1), 'two': (4 - 2), 'three': (3 * 5)}` },
+      {
+        input: `{'one': 2 - 1, 'two': 4 - 2, 'three': 3 * 5}`,
+        expected: `{'one': (2 - 1), 'two': (4 - 2), 'three': (3 * 5)}`,
+      },
+      { input: `{1 + 2: 'foo'}`, expected: `{(1 + 2): 'foo'}` },
     ];
 
     runTests(tests);
@@ -297,8 +337,8 @@ describe('Parser', () => {
         expected: '[(1 + 1), (2 * 2), (3 / 3)]',
       },
       {
-        input: '[\'foo\', fn(x) { return x; }, [1, 2, 3]]',
-        expected: '[\'foo\', fn(x) { return x; }, [1, 2, 3]]',
+        input: "['foo', fn(x) { return x; }, [1, 2, 3]]",
+        expected: "['foo', fn(x) { return x; }, [1, 2, 3]]",
       },
     ];
 

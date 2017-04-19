@@ -2,8 +2,8 @@ const { Scanner } = require('../scanner');
 const { Parser } = require('../parser');
 const { Eval, Environment } = require('./index');
 
-const runTests = (tests) => {
-  tests.forEach((t) => {
+const runTests = tests => {
+  tests.forEach(t => {
     const scanner = new Scanner(t.input);
     const parser = new Parser(scanner);
     const program = parser.parseProgram();
@@ -211,5 +211,18 @@ describe('Eval', () => {
     expect(actual.elements[0].value).toBe(1);
     expect(actual.elements[1].value).toBe(4);
     expect(actual.elements[2].value).toBe(9);
+  });
+
+  test('objects', () => {
+    const scanner = new Scanner(
+      `{'foo': 'bar', (1 + 2): '3', true: [1, 2, 3]}`
+    );
+    const parser = new Parser(scanner);
+    const program = parser.parseProgram();
+    const actual = Eval(program, new Environment());
+
+    expect(actual.pairs['foo'].value).toBe('bar');
+    expect(actual.pairs['3'].value).toBe('3');
+    expect(actual.pairs['true'].inspect()).toBe('[1,2,3]');
   });
 });
