@@ -241,4 +241,16 @@ describe('Eval', () => {
     expect(actual.pairs['3'].value).toBe('3');
     expect(actual.pairs['true'].inspect()).toBe('[1,2,3]');
   });
+
+  test('.length', () => {
+    const tests = [
+      { input: `'foo'.length`, expected: 3 },
+      { input: `''.length`, expected: 0 },
+      { input: `[1, 2, 3].length`, expected: 3 },
+      { input: `[].length`, expected: 0 },
+      { input: `{}.length`, expected: null },
+    ];
+
+    runTests(tests);
+  });
 });

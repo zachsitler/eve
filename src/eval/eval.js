@@ -1,6 +1,18 @@
 const Closure = require('./closure');
 const Eve = require('./runtime');
 
+const statics = {
+  length: (obj) => {
+    if (obj.type === 'String') {
+      return new Eve.Number(obj.value.length);
+    } else if (obj.type === 'Array') {
+      return new Eve.Number(obj.elements.length);
+    } else {
+      return new Eve.Null();
+    }
+  },
+};
+
 function isError(obj) {
   if (obj) {
     return obj.type === 'Error';
@@ -78,9 +90,17 @@ function evalIndexExpression(left, index) {
     return evalIndexArrayExpression(left, index);
   } else if (left.type === 'Hash') {
     return evalIndexHashExpression(left, index);
+  } else {
+    return evalPropertyAccessExpression(left, index);
+  }
+}
+
+function evalPropertyAccessExpression(left, index) {
+  if (statics[index.inspect()]) {
+    return statics[index.inspect()](left);
   }
 
-  return new Eve.Error(`index operator not supported: ${left.type}`);
+  return new Eve.Null();
 }
 
 function evalIndexArrayExpression(array, index) {
@@ -95,7 +115,13 @@ function evalIndexArrayExpression(array, index) {
 }
 
 function evalIndexHashExpression(hash, index) {
-  return hash.pairs[index.inspect()];
+  const value = hash.pairs[index.inspect()];
+
+  if (!value) {
+    return new Eve.Null();
+  }
+
+  return value;
 }
 
 function evalIdentifier(node, env) {
