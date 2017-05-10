@@ -1,6 +1,6 @@
-const { Scanner } = require('../scanner')
-const { Parser } = require('../parser')
-const { Eval, Environment } = require('./index')
+import { Scanner } from '../scanner'
+import { Parser } from '../parser'
+import { Eval, Environment } from './index'
 
 const runTests = tests => {
   tests.forEach(t => {

@@ -1,8 +1,8 @@
-const fs = require('fs')
-const readline = require('readline')
-const { Scanner } = require('./scanner')
-const { Parser } = require('./parser')
-const { Eval, Environment } = require('./eval')
+import fs from 'fs'
+import readline from 'readline'
+import { Scanner } from './scanner'
+import { Parser } from './parser'
+import { Eval, Environment } from './eval'
 
 /**
  * This is where the "magic" happens. Scan, Parse, and finally interpret

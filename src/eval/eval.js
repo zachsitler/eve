@@ -1,5 +1,5 @@
-const Closure = require('./closure')
-const Eve = require('./runtime')
+import Closure from './closure'
+import Eve from './runtime'
 
 /**
  * Static properties any Eve Object can have. For example, see `.length` which

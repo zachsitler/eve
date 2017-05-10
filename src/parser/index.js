@@ -1,5 +1,1 @@
-const Parser = require('./parser')
-
-module.exports = {
-  Parser,
-}
+export {default as Parser} from './parser'

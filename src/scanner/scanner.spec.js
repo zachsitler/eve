@@ -1,5 +1,5 @@
-const Scanner = require('./scanner')
-const { TokenType } = require('../token')
+import Scanner from './scanner'
+import { TokenType } from '../token'
 
 describe('Scanner', () => {
   describe('identifiers', () => {

@@ -3,7 +3,7 @@
  * them with a name. At its core, its just a light wrapper around an
  * object.
  */
-class Environment {
+export default class Environment {
   constructor() {
     this.store = {}
   }
@@ -17,5 +17,3 @@ class Environment {
     return this.store[name]
   }
 }
-
-module.exports = Environment

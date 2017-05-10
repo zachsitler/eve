@@ -1,4 +1,4 @@
-const { TokenType, Token } = require('../token')
+import { TokenType, Token } from '../token'
 
 /*
  * The Scanner is responsible for taking a string and tokenizing

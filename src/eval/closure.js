@@ -1,11 +1,11 @@
-const Environment = require('./environment')
+import Environment from './environment'
 
 /**
  * A closure is just an extension of Environment that accepts an outer
  * scope. Look up order is defined by first looking in the current
  * scope and then checking the outer scope if necessary.
  */
-class Closure extends Environment {
+export default class Closure extends Environment {
   constructor(outerEnv) {
     super()
     this.outer = outerEnv
@@ -22,5 +22,3 @@ class Closure extends Environment {
     return obj
   }
 }
-
-module.exports = Closure

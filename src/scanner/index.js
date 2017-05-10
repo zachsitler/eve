@@ -1,3 +1,1 @@
-const Scanner = require('./scanner')
-
-module.exports = { Scanner }
+export { default as Scanner } from './scanner'

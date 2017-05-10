@@ -1,4 +1,4 @@
-const { TokenType } = require('../token')
+import { TokenType } from '../token'
 
 // Precedences.
 const LOWEST = 0 // a, 'foo', 1

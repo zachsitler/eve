@@ -2,7 +2,7 @@
  * TokenType is an enum consisting on contants that are used to
  * represent lexical tokens.
  */
-class TokenType {
+export class TokenType {
   static EOF = 0
   static PLUS = 1
   static MINUS = 2
@@ -43,14 +43,9 @@ class TokenType {
 /*
  * A token is used to represent a lexical token.
  */
-class Token {
+export class Token {
   constructor(type, literal) {
     this.type = type
     this.literal = literal
   }
-}
-
-module.exports = {
-  TokenType,
-  Token,
 }

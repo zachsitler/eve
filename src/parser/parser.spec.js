@@ -1,5 +1,5 @@
-const Parser = require('./parser')
-const { Scanner } = require('../scanner')
+import Parser from './parser'
+import { Scanner } from '../scanner'
 
 const runTests = tests => {
   tests.forEach(({ input, expected }) => {
