@@ -1,0 +1,12 @@
+let fibonacci = fn(n) {
+  if (n <= 1) return 1;
+
+  return fibonacci(n - 1) + fibonacci(n - 2);
+};
+
+print(fibonacci(0)); // expect: 1
+print(fibonacci(1)); // expect: 1
+print(fibonacci(2)); // expect: 2
+print(fibonacci(3)); // expect: 3
+print(fibonacci(4)); // expect: 5
+print(fibonacci(5)); // expect: 8

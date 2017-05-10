@@ -1,0 +1,5 @@
+let song = {
+  'title': 'Mask Off',
+};
+
+print(song); // expect: {title: Mask Off}

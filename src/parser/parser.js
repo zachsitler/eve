@@ -1,16 +1,15 @@
-const { TokenType } = require('../token');
+const { TokenType } = require('../token')
 
 // Precedences.
-const LOWEST = 0; // a, 'foo', 1
-const ASSIGNMENT = 1; // a = b
-const CONDITIONAL = 2; // >, <, ==, ..
-const SUM = 3; // +, -
-const PRODUCT = 4; // *, /
-const PREFIX = 5; // -a, !a
-const CALL = 6; // -a, !a
-const INDEX = 7; // array[1], foo.length
+const LOWEST = 0 // a, 'foo', 1
+const ASSIGNMENT = 1 // a = b
+const CONDITIONAL = 2 // >, <, ==, ..
+const SUM = 3 // +, -
+const PRODUCT = 4 // *, /
+const PREFIX = 5 // -a, !a
+const CALL = 6 // -a, !a
+const INDEX = 7 // array[1], foo.length
 
-// TODO: Use the precedence values above.
 const precedences = {
   [TokenType.MINUS]: SUM,
   [TokenType.PLUS]: SUM,
@@ -26,91 +25,140 @@ const precedences = {
   [TokenType.LEFT_PAREN]: CALL,
   [TokenType.LEFT_BRACKET]: INDEX,
   [TokenType.PERIOD]: INDEX,
-};
+}
 
+/**
+ * Behold, the `Parser`. Actually, it's nothing fancy. Just a little Recursive
+ * descent parser. The grammar of Eve is technically LR(1) which is why it's
+ * so simple.
+ *
+ * At a high level, the parser just accepts a sequence of tokens, which are
+ * in turn provided by the scanner. The parser is responsible for producing
+ * an AST which will be evaluated by the `Evaluator`.
+ *
+ * Consider the following program:
+ *   let sum = 1 + 8;
+ *
+ * First, it's parsed into tokens:
+ *   [LET, IDENT, EQUALS, NUM, PLUS, NUM, SEMICOLON]
+ *
+ * Next, the parser does it's work and produces an AST:
+ *   {
+ *     type: 'Program',
+ *     body: [
+ *       {
+ *         type: 'LetStatement',
+ *         name: { type: 'Identifier', value: 'sum' },
+ *         value: {
+ *           type: 'Expression',
+ *           left: { type: 'Number', value: 1 },
+ *           op: { type: 'PLUS', value: '+' },
+ *           right: { type: 'Number', value: 8}
+ *         }
+ *       }
+ *     ]
+ *   }
+ */
 module.exports = class Parser {
   constructor(scanner) {
-    this.scanner = scanner;
+    this.scanner = scanner
 
     // Set tok/peek tokens
-    this.nextToken();
-    this.nextToken();
+    this.nextToken()
+    this.nextToken()
 
-    this.prefixParsers = {};
-    this.infixParsers = {};
+    this.prefixParsers = {}
+    this.infixParsers = {}
 
-    this.register(TokenType.IDENTIFIER, this.parseIdentifier);
-    this.register(TokenType.NUMBER, this.parseNumber);
-    this.register(TokenType.STRING, this.parseString);
-    this.register(TokenType.TRUE, this.parseBoolean);
-    this.register(TokenType.FALSE, this.parseBoolean);
-    this.register(TokenType.NULL, this.parseNull);
-    this.register(TokenType.LEFT_PAREN, this.parseGroupExpression);
-    this.register(TokenType.FN, this.parseFunction);
-    this.register(TokenType.LEFT_BRACKET, this.parseArray);
-    this.register(TokenType.LEFT_BRACE, this.parseHash);
-    this.registerInfix(TokenType.EQUAL, this.parseAssignmentExpression);
-    this.registerInfix(TokenType.LEFT_PAREN, this.parseCallExpression);
-    this.registerInfix(TokenType.LEFT_BRACKET, this.parseIndexExpression);
-    this.registerInfix(TokenType.PERIOD, this.parsePropertyAccess);
+    /**
+     *  Set up our precedences for Pratt parsing. Basically, anything that
+     *  can be the start of an expression.
+     */
+    this.register(TokenType.IDENTIFIER, this.parseIdentifier)
+    this.register(TokenType.NUMBER, this.parseNumber)
+    this.register(TokenType.STRING, this.parseString)
+    this.register(TokenType.TRUE, this.parseBoolean)
+    this.register(TokenType.FALSE, this.parseBoolean)
+    this.register(TokenType.NULL, this.parseNull)
+    this.register(TokenType.LEFT_PAREN, this.parseGroupExpression)
+    this.register(TokenType.FN, this.parseFunction)
+    this.register(TokenType.LEFT_BRACKET, this.parseArray)
+    this.register(TokenType.LEFT_BRACE, this.parseHash)
 
-    this.prefix(TokenType.MINUS);
-    this.prefix(TokenType.PLUS);
-    this.prefix(TokenType.BANG);
+    /**
+     * Anything that can be in the 'middle' of an expression, e.g. 1 `+` 2.
+     */
+    this.registerInfix(TokenType.EQUAL, this.parseAssignmentExpression)
+    this.registerInfix(TokenType.LEFT_PAREN, this.parseCallExpression)
+    this.registerInfix(TokenType.LEFT_BRACKET, this.parseIndexExpression)
+    this.registerInfix(TokenType.PERIOD, this.parsePropertyAccess)
 
-    this.infix(TokenType.MINUS);
-    this.infix(TokenType.PLUS);
-    this.infix(TokenType.STAR);
-    this.infix(TokenType.SLASH);
-    this.infix(TokenType.LESS);
-    this.infix(TokenType.LESS_EQUAL);
-    this.infix(TokenType.GREATER);
-    this.infix(TokenType.GREATER_EQUAL);
-    this.infix(TokenType.EQUAL_EQUAL);
-    this.infix(TokenType.BANG_EQUAL);
+    /**
+     * Anything that can be at the beginning of an expression,
+     * e.g. -1 or !false.
+     */
+    this.prefix(TokenType.MINUS)
+    this.prefix(TokenType.PLUS)
+    this.prefix(TokenType.BANG)
+
+    /**
+     * Anything that can be in the 'middle' of an expression. The difference
+     * here is that these are handled generically, while the ones above have
+     * custom function handlers.
+     */
+    this.infix(TokenType.MINUS)
+    this.infix(TokenType.PLUS)
+    this.infix(TokenType.STAR)
+    this.infix(TokenType.SLASH)
+    this.infix(TokenType.LESS)
+    this.infix(TokenType.LESS_EQUAL)
+    this.infix(TokenType.GREATER)
+    this.infix(TokenType.GREATER_EQUAL)
+    this.infix(TokenType.EQUAL_EQUAL)
+    this.infix(TokenType.BANG_EQUAL)
   }
 
   register(type, parser) {
-    this.prefixParsers[type] = parser.bind(this);
+    this.prefixParsers[type] = parser.bind(this)
   }
 
   registerInfix(type, parser) {
-    this.infixParsers[type] = parser.bind(this);
+    this.infixParsers[type] = parser.bind(this)
   }
 
   prefix(type) {
-    this.register(type, this.parsePrefixExpression);
+    this.register(type, this.parsePrefixExpression)
   }
 
   infix(type) {
-    this.infixParsers[type] = this.parseInfixExpression.bind(this);
+    this.infixParsers[type] = this.parseInfixExpression.bind(this)
   }
 
   parseProgram() {
     const ast = {
       type: 'Program',
       statements: [],
-    };
-
-    while (this.tok.type !== TokenType.EOF) {
-      const stmt = this.parseStatement();
-      if (stmt) ast.statements.push(stmt);
-      this.nextToken();
     }
 
-    return ast;
+    while (this.tok.type !== TokenType.EOF) {
+      const stmt = this.parseStatement()
+      if (stmt) ast.statements.push(stmt)
+      this.nextToken()
+    }
+
+    return ast
   }
 
   parseStatement() {
     switch (this.tok.type) {
       case TokenType.IF:
-        return this.parseIfStatement();
+        return this.parseIfStatement()
       case TokenType.LET:
-        return this.parseLetStatement();
+        return this.parseLetStatement()
       case TokenType.RETURN:
-        return this.parseReturnStatement();
+        return this.parseReturnStatement()
       default:
-        return this.parseExpressionStatement();
+        return this.parseExpressionStatement()
     }
   }
 
@@ -122,109 +170,104 @@ module.exports = class Parser {
    */
   parseBlockOrStatement() {
     if (this.isCurToken(TokenType.LEFT_BRACE)) {
-      return this.parseBlockStatement();
+      return this.parseBlockStatement()
     }
 
-    return this.parseStatement();
+    return this.parseStatement()
   }
 
   parseIfStatement() {
-    // consume if
-    this.nextToken();
+    this.nextToken()
 
     const ifStatement = {
       type: 'IfStatement',
       condition: this.parseExpression(),
       toString() {
-        let str = `if (${this.condition.toString()})`;
-        str += ` ${this.thenArm.toString()}`;
-        if (this.elseArm) str += ` else ${this.elseArm.toString()}`;
-        return str;
+        let str = `if (${this.condition.toString()})`
+        str += ` ${this.thenArm.toString()}`
+        if (this.elseArm) str += ` else ${this.elseArm.toString()}`
+        return str
       },
-    };
+    }
 
     if (!this.match(TokenType.RIGHT_PAREN)) {
-      return null;
+      return null
     }
 
-    ifStatement.thenArm = this.parseBlockOrStatement();
+    ifStatement.thenArm = this.parseBlockOrStatement()
 
     if (this.expect(TokenType.ELSE)) {
-      this.nextToken();
-      ifStatement.elseArm = this.parseBlockOrStatement();
-      this.match(TokenType.RIGHT_BRACE);
+      this.nextToken()
+      ifStatement.elseArm = this.parseBlockOrStatement()
+      this.match(TokenType.RIGHT_BRACE)
     }
 
-    return ifStatement;
+    return ifStatement
   }
 
   parseBlockStatement() {
-    // consume {
-    this.nextToken();
+    this.nextToken()
 
     const blockStatement = {
       type: 'BlockStatement',
       statements: [],
       toString() {
-        return `{ ${this.statements.map(stmt => stmt.toString()).join('')} }`;
+        return `{ ${this.statements.map(stmt => stmt.toString()).join('')} }`
       },
-    };
-
-    while (this.tok.type !== TokenType.RIGHT_BRACE) {
-      const statement = this.parseStatement();
-      if (statement) blockStatement.statements.push(statement);
-      this.nextToken();
     }
 
-    return blockStatement;
+    while (this.tok.type !== TokenType.RIGHT_BRACE) {
+      const statement = this.parseStatement()
+      if (statement) blockStatement.statements.push(statement)
+      this.nextToken()
+    }
+
+    return blockStatement
   }
 
   parseLetStatement() {
-    // consume let
-    this.nextToken();
+    this.nextToken()
 
     const statement = {
       type: 'LetStatement',
       name: this.parseIdentifier(),
       toString() {
-        let str = `let ${this.name.toString()}`;
-        if (this.value) str += ` = ${this.value.toString()}`;
-        return `${str};`;
+        let str = `let ${this.name.toString()}`
+        if (this.value) str += ` = ${this.value.toString()}`
+        return `${str};`
       },
-    };
+    }
 
     if (this.isPeekToken(TokenType.EQUAL)) {
-      // consume ident
-      this.nextToken();
+      this.nextToken()
 
-      // consume equals
-      this.nextToken();
-      statement.value = this.parseExpression();
+      this.nextToken()
+      statement.value = this.parseExpression()
     }
 
     if (this.isPeekToken(TokenType.SEMICOLON)) {
-      this.nextToken();
+      this.nextToken()
     }
 
-    return statement;
+    return statement
   }
 
   parseReturnStatement() {
-    this.nextToken();
+    this.nextToken()
 
     const statement = {
       type: 'ReturnStatement',
       expression: this.parseExpression(),
       toString() {
-        return `return ${this.expression.toString()};`;
+        return `return ${this.expression.toString()};`
       },
-    };
-
-    if (this.isPeekToken(TokenType.SEMICOLON)) {
-      this.nextToken();
     }
 
-    return statement;
+    if (this.isPeekToken(TokenType.SEMICOLON)) {
+      this.nextToken()
+    }
+
+    return statement
   }
 
   parseExpressionStatement() {
@@ -232,38 +275,38 @@ module.exports = class Parser {
       type: 'ExpressionStatement',
       expression: this.parseExpression(),
       toString() {
-        return `${this.expression.toString()};`;
+        return `${this.expression.toString()};`
       },
-    };
-
-    if (this.isPeekToken(TokenType.SEMICOLON)) {
-      this.nextToken();
     }
 
-    return statement;
+    if (this.isPeekToken(TokenType.SEMICOLON)) {
+      this.nextToken()
+    }
+
+    return statement
   }
 
   parseExpression(precedence = LOWEST) {
-    const prefix = this.prefixParsers[this.tok.type];
+    const prefix = this.prefixParsers[this.tok.type]
 
     if (!prefix) {
-      throw new Error(`Syntax error: unexpected token ${this.tok.literal}`);
+      throw new Error(`Syntax error: unexpected token ${this.tok.literal}`)
     }
 
-    let left = prefix();
+    let left = prefix()
 
     while (
       !this.isPeekToken(TokenType.SEMI_COLON) &&
       precedence < this.peekPrecedence()
     ) {
-      const infix = this.infixParsers[this.peek.type];
-      if (!infix) return left;
+      const infix = this.infixParsers[this.peek.type]
+      if (!infix) return left
 
-      this.nextToken();
-      left = infix(left);
+      this.nextToken()
+      left = infix(left)
     }
 
-    return left;
+    return left
   }
 
   parsePrefixExpression() {
@@ -271,16 +314,16 @@ module.exports = class Parser {
       type: 'PrefixExpression',
       op: this.tok.literal,
       toString() {
-        return `(${this.op}${this.right.toString()})`;
+        return `(${this.op}${this.right.toString()})`
       },
-    };
+    }
 
     // Advance past the operator.
-    this.nextToken();
+    this.nextToken()
 
-    expression.right = this.parseExpression(PREFIX);
+    expression.right = this.parseExpression(PREFIX)
 
-    return expression;
+    return expression
   }
 
   parseInfixExpression(left) {
@@ -289,15 +332,15 @@ module.exports = class Parser {
       op: this.tok.literal,
       left,
       toString() {
-        return `(${this.left.toString()} ${this.op} ${this.right.toString()})`;
+        return `(${this.left.toString()} ${this.op} ${this.right.toString()})`
       },
-    };
+    }
 
-    const precedence = this.getPrecedence();
-    this.nextToken();
-    expression.right = this.parseExpression(precedence);
+    const precedence = this.getPrecedence()
+    this.nextToken()
+    expression.right = this.parseExpression(precedence)
 
-    return expression;
+    return expression
   }
 
   parseAssignmentExpression(left) {
@@ -306,14 +349,14 @@ module.exports = class Parser {
       op: this.tok.literal,
       left,
       toString() {
-        return `(${this.left.toString()} ${this.op} ${this.right.toString()})`;
+        return `(${this.left.toString()} ${this.op} ${this.right.toString()})`
       },
-    };
+    }
 
-    this.nextToken();
-    expr.right = this.parseExpression();
+    this.nextToken()
+    expr.right = this.parseExpression()
 
-    return expr;
+    return expr
   }
 
   parsePropertyAccess(left) {
@@ -322,30 +365,30 @@ module.exports = class Parser {
       left,
       toString() {
         return `${this.left.toString()}.${this.index.toString()}`
-      }
-    };
+      },
+    }
 
-    this.nextToken();
+    this.nextToken()
 
-    expr.index = this.parseProperty();
+    expr.index = this.parseProperty()
 
-    return expr;
+    return expr
   }
 
   parseProperty() {
     const property = {
       type: 'PropertyAccess',
       toString() {
-        return `${this.value.toString()}`;
-      }
-    };
+        return `${this.value.toString()}`
+      },
+    }
 
     // We only allow identifiers for a property access, e.g. foo.bar
     if (!this.isCurToken(TokenType.IDENTIFIER)) {
-      throw new Error(`Syntax error: unexpected token ${this.tok.literal}`);
+      throw new Error(`Syntax error: unexpected token ${this.tok.literal}`)
     }
 
-    property.value = this.tok.literal;
+    property.value = this.tok.literal
     return property
   }
 
@@ -354,19 +397,19 @@ module.exports = class Parser {
       type: 'IndexExpression',
       left,
       toString() {
-        return `${this.left.toString()}[${this.index.toString()}]`;
+        return `${this.left.toString()}[${this.index.toString()}]`
       },
-    };
-
-    this.nextToken();
-
-    expr.index = this.parseExpression();
-
-    if (!this.expect(TokenType.RIGHT_BRACKET)) {
-      return null;
     }
 
-    return expr;
+    this.nextToken()
+
+    expr.index = this.parseExpression()
+
+    if (!this.expect(TokenType.RIGHT_BRACKET)) {
+      return null
+    }
+
+    return expr
   }
 
   parseCallExpression(fn) {
@@ -375,93 +418,89 @@ module.exports = class Parser {
       fn,
       args: this.parseExpressionList(TokenType.RIGHT_PAREN),
       toString() {
-        return `${this.fn}(${this.args.map(arg => arg.toString()).join(', ')})`;
+        return `${this.fn}(${this.args.map(arg => arg.toString()).join(', ')})`
       },
-    };
+    }
   }
 
   parseExpressionList(end) {
-    const args = [];
+    const args = []
 
     if (this.isPeekToken(end)) {
-      this.nextToken();
-      return args;
+      this.nextToken()
+      return args
     }
 
-    this.nextToken();
-    args.push(this.parseExpression());
+    this.nextToken()
+    args.push(this.parseExpression())
 
     while (this.isPeekToken(TokenType.COMMA)) {
-      this.nextToken();
-      this.nextToken();
-      args.push(this.parseExpression());
+      this.nextToken()
+      this.nextToken()
+      args.push(this.parseExpression())
     }
 
     if (!this.isPeekToken(end)) {
-      return null;
+      return null
     }
 
-    this.nextToken();
+    this.nextToken()
 
-    return args;
+    return args
   }
 
   parseGroupExpression() {
     // Consume opening '('.
-    this.nextToken();
+    this.nextToken()
 
-    const expression = this.parseExpression();
+    const expression = this.parseExpression()
 
     if (this.isPeekToken(TokenType.RIGHT_PAREN)) {
-      this.nextToken();
+      this.nextToken()
     }
 
-    return expression;
+    return expression
   }
 
   parseParameterList() {
-    // consume (
-    this.nextToken();
+    this.nextToken()
 
     const parameters = {
       type: 'Parameters',
       body: [],
       toString() {
-        return `(${this.body.map(ident => ident.toString()).join(', ')})`;
+        return `(${this.body.map(ident => ident.toString()).join(', ')})`
       },
-    };
+    }
 
     while (this.tok.type !== TokenType.RIGHT_PAREN) {
-      parameters.body.push(this.parseIdentifier());
-      this.nextToken();
+      parameters.body.push(this.parseIdentifier())
+      this.nextToken()
 
       if (this.tok.type === TokenType.COMMA) {
-        // consume ','
-        this.nextToken();
+        this.nextToken()
       }
     }
 
-    // consume trailing )
-    this.nextToken();
+    this.nextToken()
 
-    return parameters;
+    return parameters
   }
 
   parseFunction() {
-    // consume fn
-    this.nextToken();
+    this.nextToken()
 
     const fn = {
       type: 'Function',
       params: this.parseParameterList(),
       toString() {
-        return `fn${this.params.toString()} ${this.body.toString()}`;
+        return `fn${this.params.toString()} ${this.body.toString()}`
       },
-    };
+    }
 
-    fn.body = this.parseBlockStatement();
+    fn.body = this.parseBlockStatement()
 
-    return fn;
+    return fn
   }
 
   parseHash() {
@@ -471,38 +510,38 @@ module.exports = class Parser {
       toString() {
         const keys = this.pairs
           .map(([key, val]) => `${key.toString()}: ${val.toString()}`)
-          .join(', ');
+          .join(', ')
 
-        return `{${keys}}`;
+        return `{${keys}}`
       },
-    };
+    }
 
-    let pairIndex = 0;
+    let pairIndex = 0
 
     while (!this.isPeekToken(TokenType.RIGHT_BRACE)) {
-      this.nextToken();
-      const key = this.parseExpression();
+      this.nextToken()
+      const key = this.parseExpression()
 
       if (!this.expect(TokenType.COLON)) {
-        return null;
+        return null
       }
 
-      this.nextToken();
-      hash.pairs[pairIndex] = [key, this.parseExpression()];
-      pairIndex += 1;
+      this.nextToken()
+      hash.pairs[pairIndex] = [key, this.parseExpression()]
+      pairIndex += 1
 
       if (
         !this.isPeekToken(TokenType.RIGHT_BRACE) &&
         !this.expect(TokenType.COMMA)
       ) {
-        return null;
+        return null
       }
     }
 
     // Advance past the last expression
-    this.nextToken();
+    this.nextToken()
 
-    return hash;
+    return hash
   }
 
   parseArray() {
@@ -510,11 +549,11 @@ module.exports = class Parser {
       type: 'Array',
       elements: this.parseExpressionList(TokenType.RIGHT_BRACKET),
       toString() {
-        return `[${this.elements.map(elem => elem.toString()).join(', ')}]`;
+        return `[${this.elements.map(elem => elem.toString()).join(', ')}]`
       },
-    };
+    }
 
-    return array;
+    return array
   }
 
   parseIdentifier() {
@@ -522,9 +561,9 @@ module.exports = class Parser {
       type: 'Identifier',
       value: this.tok.literal,
       toString() {
-        return this.value;
+        return this.value
       },
-    };
+    }
   }
 
   parseNull() {
@@ -532,9 +571,9 @@ module.exports = class Parser {
       type: 'Null',
       value: this.tok.literal,
       toString() {
-        return this.value;
+        return this.value
       },
-    };
+    }
   }
 
   parseBoolean() {
@@ -542,9 +581,9 @@ module.exports = class Parser {
       type: 'Boolean',
       value: this.tok.literal,
       toString() {
-        return this.value;
+        return this.value
       },
-    };
+    }
   }
 
   parseNumber() {
@@ -552,9 +591,9 @@ module.exports = class Parser {
       type: 'Number',
       value: this.tok.literal,
       toString() {
-        return this.value;
+        return this.value
       },
-    };
+    }
   }
 
   parseString() {
@@ -562,51 +601,51 @@ module.exports = class Parser {
       type: 'String',
       value: this.tok.literal,
       toString() {
-        return `'${this.value}'`;
+        return `'${this.value}'`
       },
-    };
+    }
   }
 
   match(type) {
     if (this.isCurToken(type)) {
-      this.nextToken();
-      return true;
+      this.nextToken()
+      return true
     }
-    return false;
+    return false
   }
 
   expect(type) {
     if (this.isPeekToken(type)) {
-      this.nextToken();
-      return true;
+      this.nextToken()
+      return true
     }
-    return false;
+    return false
   }
 
   isPeekToken(type) {
-    return this.peek.type === type;
+    return this.peek.type === type
   }
 
   isCurToken(type) {
-    return this.tok.type === type;
+    return this.tok.type === type
   }
 
   nextToken() {
-    this.tok = this.peek;
-    this.peek = this.scanner.scanToken();
+    this.tok = this.peek
+    this.peek = this.scanner.scanToken()
   }
 
   peekPrecedence() {
-    const precedence = precedences[this.peek.type];
-    if (precedence) return precedence;
+    const precedence = precedences[this.peek.type]
+    if (precedence) return precedence
 
-    return LOWEST;
+    return LOWEST
   }
 
   getPrecedence() {
-    const precedence = precedences[this.tok.type];
-    if (precedence) return precedence;
+    const precedence = precedences[this.tok.type]
+    if (precedence) return precedence
 
-    return LOWEST;
+    return LOWEST
   }
-};
+}

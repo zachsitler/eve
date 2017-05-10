@@ -1,0 +1,11 @@
+let makeAdder = fn(x) {
+  return fn(y) {
+    return x + y;
+  };
+};
+
+let add5 = makeAdder(5);
+let add10 = makeAdder(10);
+
+print(add5(2)); // expect: 7
+print(add10(2)); // expect: 12

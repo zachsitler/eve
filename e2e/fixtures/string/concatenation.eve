@@ -1,0 +1,2 @@
+print('foo' + 'bar'); // expect: foobar
+print('' + ''); // expect:

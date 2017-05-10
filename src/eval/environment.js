@@ -5,16 +5,17 @@
  */
 class Environment {
   constructor() {
-    this.store = {};
+    this.store = {}
   }
 
   get(name) {
-    return this.store[name];
+    return this.store[name]
   }
 
   set(name, obj) {
-    return (this.store[name] = obj);
+    this.store[name] = obj
+    return this.store[name]
   }
 }
 
-module.exports = Environment;
+module.exports = Environment

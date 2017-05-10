@@ -1,60 +1,60 @@
-const Scanner = require('./scanner');
-const { TokenType } = require('../token');
+const Scanner = require('./scanner')
+const { TokenType } = require('../token')
 
 describe('Scanner', () => {
   describe('identifiers', () => {
     it("tokenizes 'foo' correctly", () => {
-      const token = new Scanner('foo').scanToken();
-      expect(token.type).toBe(TokenType.IDENTIFIER);
-      expect(token.literal).toBe('foo');
-    });
+      const token = new Scanner('foo').scanToken()
+      expect(token.type).toBe(TokenType.IDENTIFIER)
+      expect(token.literal).toBe('foo')
+    })
 
     it("tokenizes 'foo1234' correctly", () => {
-      const token = new Scanner('foo1234').scanToken();
-      expect(token.type).toBe(TokenType.IDENTIFIER);
-      expect(token.literal).toBe('foo1234');
-    });
+      const token = new Scanner('foo1234').scanToken()
+      expect(token.type).toBe(TokenType.IDENTIFIER)
+      expect(token.literal).toBe('foo1234')
+    })
 
     it("tokenizes '_foo1234' correctly", () => {
-      const token = new Scanner('_foo1234').scanToken();
-      expect(token.type).toBe(TokenType.IDENTIFIER);
-      expect(token.literal).toBe('_foo1234');
-    });
+      const token = new Scanner('_foo1234').scanToken()
+      expect(token.type).toBe(TokenType.IDENTIFIER)
+      expect(token.literal).toBe('_foo1234')
+    })
 
     it("tokenizes '_foo_1234_' correctly", () => {
-      const token = new Scanner('_foo_1234_').scanToken();
-      expect(token.type).toBe(TokenType.IDENTIFIER);
-      expect(token.literal).toBe('_foo_1234_');
-    });
+      const token = new Scanner('_foo_1234_').scanToken()
+      expect(token.type).toBe(TokenType.IDENTIFIER)
+      expect(token.literal).toBe('_foo_1234_')
+    })
 
     it("does not tokenize '1234a'", () => {
-      const token = new Scanner('1234a').scanToken();
-      expect(token.type).toBe(TokenType.NUMBER);
-      expect(token.literal).toBe('1234');
-    });
-  });
+      const token = new Scanner('1234a').scanToken()
+      expect(token.type).toBe(TokenType.NUMBER)
+      expect(token.literal).toBe('1234')
+    })
+  })
 
   describe('numbers', () => {
     it("tokenizes '1234' correctly", () => {
-      const token = new Scanner('1234').scanToken();
-      expect(token.type).toBe(TokenType.NUMBER);
-      expect(token.literal).toBe('1234');
-    });
+      const token = new Scanner('1234').scanToken()
+      expect(token.type).toBe(TokenType.NUMBER)
+      expect(token.literal).toBe('1234')
+    })
 
     it("tokenizes '1234.56789' correctly", () => {
-      const token = new Scanner('1234.56789').scanToken();
-      expect(token.type).toBe(TokenType.NUMBER);
-      expect(token.literal).toBe('1234.56789');
-    });
-  });
+      const token = new Scanner('1234.56789').scanToken()
+      expect(token.type).toBe(TokenType.NUMBER)
+      expect(token.literal).toBe('1234.56789')
+    })
+  })
 
   describe('strings', () => {
     it("tokenizes 'abc123!@#$' correctly", () => {
-      const token = new Scanner("'abc1234!@#$'").scanToken();
-      expect(token.type).toBe(TokenType.STRING);
-      expect(token.literal).toBe('abc1234!@#$');
-    });
-  });
+      const token = new Scanner("'abc1234!@#$'").scanToken()
+      expect(token.type).toBe(TokenType.STRING)
+      expect(token.literal).toBe('abc1234!@#$')
+    })
+  })
 
   describe('scanToken', () => {
     it('tokenizes punctuators correctly', () => {
@@ -100,14 +100,14 @@ describe('Scanner', () => {
           input: '>=',
           expected: { type: TokenType.GREATER_EQUAL, literal: '>=' },
         },
-      ];
+      ]
 
       tests.forEach(({ input, expected }) => {
-        const actual = new Scanner(input).scanToken();
-        expect(actual.type).toBe(expected.type);
-        expect(actual.literal).toBe(expected.literal);
-      });
-    });
+        const actual = new Scanner(input).scanToken()
+        expect(actual.type).toBe(expected.type)
+        expect(actual.literal).toBe(expected.literal)
+      })
+    })
 
     it('tokenizes reserved words correctly', () => {
       const tests = [
@@ -129,29 +129,29 @@ describe('Scanner', () => {
           expected: { type: TokenType.FALSE, literal: 'false' },
         },
         { input: 'null', expected: { type: TokenType.NULL, literal: 'null' } },
-      ];
+      ]
 
       tests.forEach(({ input, expected }) => {
-        const actual = new Scanner(input).scanToken();
-        expect(actual.type).toBe(expected.type);
-        expect(actual.literal).toBe(expected.literal);
-      });
-    });
+        const actual = new Scanner(input).scanToken()
+        expect(actual.type).toBe(expected.type)
+        expect(actual.literal).toBe(expected.literal)
+      })
+    })
 
     it('trims whitespace', () => {
-      const token = new Scanner('   1   ').scanToken();
-      expect(token.type).toBe(TokenType.NUMBER);
-      expect(token.literal).toBe('1');
-    });
+      const token = new Scanner('   1   ').scanToken()
+      expect(token.type).toBe(TokenType.NUMBER)
+      expect(token.literal).toBe('1')
+    })
 
     it('skips comments', () => {
-      const scanner = new Scanner('1 // some amazing comment');
-      const number = scanner.scanToken();
-      const eof = scanner.scanToken();
-      expect(number.type).toBe(TokenType.NUMBER);
-      expect(number.literal).toBe('1');
-      expect(eof.type).toBe(TokenType.EOF);
-      expect(eof.literal).toBe('\0');
-    });
-  });
-});
+      const scanner = new Scanner('1 // some amazing comment')
+      const number = scanner.scanToken()
+      const eof = scanner.scanToken()
+      expect(number.type).toBe(TokenType.NUMBER)
+      expect(number.literal).toBe('1')
+      expect(eof.type).toBe(TokenType.EOF)
+      expect(eof.literal).toBe('\0')
+    })
+  })
+})

@@ -1,0 +1,2 @@
+print([1, 2, 3].length); // expect: 3
+print([].length); // expect: 0

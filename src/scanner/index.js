@@ -1,3 +1,3 @@
-const Scanner = require('./scanner');
+const Scanner = require('./scanner')
 
-module.exports = { Scanner };
+module.exports = { Scanner }

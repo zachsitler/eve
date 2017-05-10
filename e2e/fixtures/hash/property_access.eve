@@ -1,0 +1,7 @@
+let person = {
+  'name': 'Kaladin Stormblessed',
+  'age': 20,
+};
+
+print(person.name); // expect: Kaladin Stormblessed
+print(person['age']); // expect: 20
