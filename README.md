@@ -87,17 +87,17 @@ Arrays can arbitrarily grow/decrease in size and accept any values.
 
 Arrays have a handy set of functions that can be accessed.
 ```js
-[1, 2, 3].count(); // ==> 3
-[1, 2, 3].map(x => x + 1); // ==> [2, 3, 4]
-[1, 2, 3].each(x => x); // ==> null
-[1, 2, 3].filter(x => x > 1); // ==> [2, 3]
+[1, 2, 3].count();               // ==> 3
+[1, 2, 3].map(x => x + 1);       // ==> [2, 3, 4]
+[1, 2, 3].each(x => x);          // ==> null
+[1, 2, 3].filter(x => x > 1);    // ==> [2, 3]
 [1, 2, 3].sort((a, b) => b - 1); // ==> [3, 2, 1]
-[1, 2, 3].reverse(); // ==> [3, 2, 1]
-[1, 2, 3].rest(); // ==> [2, 3]
-[1, 2, 3].first(); // ==> [1]
-[1, 2, 3].last(); // ==> [3]
-[1, 2, 3].avg(); // ==> [2]
-[1, 2, 3].sum(); // ==> [6]
+[1, 2, 3].reverse();             // ==> [3, 2, 1]
+[1, 2, 3].rest();                // ==> [2, 3]
+[1, 2, 3].first();               // ==> [1]
+[1, 2, 3].last();                // ==> [3]
+[1, 2, 3].avg();                 // ==> [2]
+[1, 2, 3].sum();                 // ==> [6]
 ```
 
 ### Objects
