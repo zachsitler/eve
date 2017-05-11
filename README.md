@@ -1,6 +1,6 @@
 # Eve [![Build Status](https://travis-ci.com/zachsitler/eve.svg?token=jM57TwesxyoNy8ahi5gJ&branch=master)](https://travis-ci.com/zachsitler/eve)
 
-Eve is a small, interpreted, toy, javascript like language.
+Small, interpreted, javascript like toy language.
 
 ## Getting started
 ```sh
