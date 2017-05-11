@@ -4,48 +4,14 @@ Eve is a little, toy, javascript like langauge interpreted in javascript.
 I made it entirely for fun.
 
 ### Getting started
-```
-git clone git@github.com:zachsitler/eve.git
-cd eve && npm install
-npm run build
-node build/eve.js
+```sh
+$ git clone git@github.com:zachsitler/eve.git
+$ cd eve && npm install
+$ npm run build && node build/eve.js
 > print('hello, world!')
 
 # Or run a file
-node build/eve.js ./main.eve
-```
-
-#### Sample programs
-
-Hello, world
-```js
-print('hello, world');
-```
-
-Fibonacci
-```js
-let fibonacci = fn(n) {
-  if (n <= 1) return 1;
-
-  fibonacci(n - 1) + fibonacci(n - 2);
-};
-
-print(fibonacci(5)); // ==> 8
-```
-
-Closures
-```js
-let makeAdder = fn(x) {
-  return fn(y) {
-    return x + y;
-  };
-};
-
-let add5 = makeAdder(5);
-let add10 = makeAdder(10);
-
-print(add5(2)); // expect: 7
-print(add10(2)); // expect: 12
+$ node build/eve.js ./main.eve
 ```
 
 ## Syntax
@@ -60,7 +26,7 @@ print('foo'); // This is also a comment.
 
 ### Numbers
 
-Numbers are 64-bit values.
+All numbers are stored as doubles (64-bit) values.
 ```js
 5; // integer
 -10; // negative values
@@ -124,4 +90,37 @@ Expressions follow typical PEMDAS precendence.
 1 + 2 * 3; // 7
 (1 + 2) * 3; // 9
 4 / 4 * 4; // 4
+```
+
+### Sample programs
+
+#### Hello, world
+```js
+print('hello, world');
+```
+
+#### Fibonacci
+```js
+let fibonacci = fn(n) {
+  if (n <= 1) return 1;
+
+  fibonacci(n - 1) + fibonacci(n - 2);
+};
+
+print(fibonacci(5)); // ==> 8
+```
+
+#### Closures
+```js
+let makeAdder = fn(x) {
+  return fn(y) {
+    return x + y;
+  };
+};
+
+let add5 = makeAdder(5);
+let add10 = makeAdder(10);
+
+print(add5(2)); // expect: 7
+print(add10(2)); // expect: 12
 ```
