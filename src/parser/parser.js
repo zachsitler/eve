@@ -59,7 +59,7 @@ const precedences = {
  *     ]
  *   }
  */
-module.exports = class Parser {
+export default class Parser {
   constructor(scanner) {
     this.scanner = scanner
 

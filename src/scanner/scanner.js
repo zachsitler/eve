@@ -8,7 +8,7 @@ import { TokenType, Token } from '../token'
  *   let language = 'eve'; -> [LET, IDENTIFIER, EQUAL, STRING, SEMICOLON]
  *
  */
-module.exports = class Scanner {
+export default class Scanner {
   static isDigit(ch) {
     return ch >= '0' && ch <= '9'
   }

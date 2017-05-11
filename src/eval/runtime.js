@@ -1,11 +1,11 @@
 /**
  * The foundation of the interpreter. Everything is an object in some form or
- * another. Even if it does not inherit from `EveObject`, it at least follows
+ * another. Even if it does not inherit from `Object`, it at least follows
  * the same interface.
  *
  * Each object must have a `type` and implement an `inspect` function.
  */
-class EveObject {
+export class EveObject {
   constructor(type, value) {
     this.type = type
     this.value = value
@@ -21,7 +21,7 @@ class EveObject {
  * have a value. This is returned by out of bounds accesses, or newly
  * defined variables for example.
  */
-class EveNull extends EveObject {
+export class Null extends EveObject {
   constructor() {
     super('Null', null)
   }
@@ -31,7 +31,7 @@ class EveNull extends EveObject {
  * Helper for the `boolean` type. A `boolean` represents a true or
  * false value. Internally it is just stored as a JS boolean.
  */
-class EveBoolean extends EveObject {
+export class Boolean extends EveObject {
   constructor(value) {
     super('Boolean', value)
   }
@@ -42,7 +42,7 @@ class EveBoolean extends EveObject {
  * numbers. Special cases like scientific notation are not supported by the
  * parser.
  */
-class EveNumber extends EveObject {
+export class Number extends EveObject {
   constructor(value) {
     super('Number', value)
   }
@@ -51,7 +51,7 @@ class EveNumber extends EveObject {
 /**
  * Helper for the `string` type. Just good ol' fashioned strings man.
  */
-class EveString extends EveObject {
+export class String extends EveObject {
   constructor(value) {
     super('String', value)
   }
@@ -61,7 +61,7 @@ class EveString extends EveObject {
  * Represents a return statement. A return statement has the same behavior
  * as in JS.
  */
-class EveReturn extends EveObject {
+export class Return extends EveObject {
   constructor(value) {
     super('Return', value)
   }
@@ -71,7 +71,7 @@ class EveReturn extends EveObject {
  * Helper for the `array` type. The elements can be of any type and since
  * it is a dynamic language, the length is not bound either.
  */
-class EveArray {
+export class Array {
   constructor(elements) {
     this.type = 'Array'
     this.elements = elements
@@ -86,7 +86,7 @@ class EveArray {
  * Helper for the `error` type. This also enforces consistent formatting
  * of error messages.
  */
-class EveError {
+export class Error {
   constructor(message) {
     this.type = 'Error'
     this.message = message
@@ -106,10 +106,10 @@ class EveError {
  *   {1 + 2: '3'}, obj['3'] ==> '3'
  *
  * The biggest distinction is that keys can be defined with expressions. JS
- * does have support for this is in es2015 with the Object initialiazer spec,
+ * does have support for this is in es2015 with the EveObject initialiazer spec,
  * e.g. {[1 + 2]: '3'}.
  */
-class EveHash {
+export class Hash {
   constructor(pairs) {
     this.type = 'Hash'
     this.pairs = pairs
@@ -142,7 +142,7 @@ class EveHash {
  *  Just like coffeescript, the last value of the last statement will be
  *  returned.
  */
-class EveFunction extends EveObject {
+export class Function extends EveObject {
   constructor(params, body, env) {
     super()
     this.params = params
@@ -154,17 +154,4 @@ class EveFunction extends EveObject {
   inspect() {
     return `fn${this.params.toString()} ${this.body.toString()}`
   }
-}
-
-module.exports = {
-  Object: EveObject,
-  Error: EveError,
-  Null: EveNull,
-  Boolean: EveBoolean,
-  String: EveString,
-  Number: EveNumber,
-  Return: EveReturn,
-  Array: EveArray,
-  Hash: EveHash,
-  Function: EveFunction,
 }

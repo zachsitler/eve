@@ -9,7 +9,9 @@
   "scripts": {
     "build": "babel src -d build",
     "format": "prettier --no-semi --single-quote --trailing-comma es5 --write \"{src,test}/**/*.js\"",
-    "test": "jest ./src/*"
+    "test:unit": "jest ./src/*",
+    "test:e2e": "node e2e/test.js",
+    "test": "npm run test:unit && npm run test:e2e"
   },
   "dependencies": {
     "jest": "^18.1.0"

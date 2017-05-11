@@ -1,5 +1,5 @@
 import Closure from './closure'
-import Eve from './runtime'
+import * as Eve from './runtime'
 
 /**
  * Static properties any Eve Object can have. For example, see `.length` which
@@ -375,7 +375,7 @@ function evalStringInfixExpression(op, left, right) {
   return new Eve.String(left.value + right.value)
 }
 
-function Eval(node, env) {
+export default function Eval(node, env) {
   switch (node.type) {
     case 'Program':
       return evalProgram(node.statements, env)
@@ -506,5 +506,3 @@ function Eval(node, env) {
       return new Eve.Null()
   }
 }
-
-module.exports = Eval
