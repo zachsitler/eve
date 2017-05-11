@@ -25,6 +25,7 @@ const precedences = {
   [TokenType.LEFT_PAREN]: CALL,
   [TokenType.LEFT_BRACKET]: INDEX,
   [TokenType.PERIOD]: INDEX,
+  [TokenType.FAT_ARROW]: ASSIGNMENT,
 }
 
 /**
@@ -80,7 +81,7 @@ export default class Parser {
     this.register(TokenType.TRUE, this.parseBoolean)
     this.register(TokenType.FALSE, this.parseBoolean)
     this.register(TokenType.NULL, this.parseNull)
-    this.register(TokenType.LEFT_PAREN, this.parseGroupExpression)
+    this.register(TokenType.LEFT_PAREN, this.parseGroupOrParameters)
     this.register(TokenType.FN, this.parseFunction)
     this.register(TokenType.LEFT_BRACKET, this.parseArray)
     this.register(TokenType.LEFT_BRACE, this.parseHash)
@@ -92,6 +93,7 @@ export default class Parser {
     this.registerInfix(TokenType.LEFT_PAREN, this.parseCallExpression)
     this.registerInfix(TokenType.LEFT_BRACKET, this.parseIndexExpression)
     this.registerInfix(TokenType.PERIOD, this.parsePropertyAccess)
+    this.registerInfix(TokenType.FAT_ARROW, this.parseLambda)
 
     /**
      * Anything that can be at the beginning of an expression,
@@ -181,7 +183,7 @@ export default class Parser {
 
     const ifStatement = {
       type: 'IfStatement',
-      condition: this.parseExpression(),
+      condition: this.parseGroupExpression(),
       toString() {
         let str = `if (${this.condition.toString()})`
         str += ` ${this.thenArm.toString()}`
@@ -304,7 +306,9 @@ export default class Parser {
 
       this.nextToken()
       left = infix(left)
+
     }
+
 
     return left
   }
@@ -449,10 +453,17 @@ export default class Parser {
     return args
   }
 
-  parseGroupExpression() {
-    // Consume opening '('.
-    this.nextToken()
+  parseGroupOrParameters() {
+    this.match(TokenType.LEFT_PAREN);
 
+    if (this.isCurToken(TokenType.RIGHT_PAREN) || (this.isCurToken(TokenType.IDENTIFIER) && this.isPeekToken(TokenType.COMMA))) {
+      return this.parseParameterList()
+    }
+
+    return this.parseGroupExpression()
+  }
+
+  parseGroupExpression() {
     const expression = this.parseExpression()
 
     if (this.isPeekToken(TokenType.RIGHT_PAREN)) {
@@ -463,7 +474,7 @@ export default class Parser {
   }
 
   parseParameterList() {
-    this.nextToken()
+    this.match(TokenType.LEFT_PAREN)
 
     const parameters = {
       type: 'Parameters',
@@ -482,8 +493,6 @@ export default class Parser {
       }
     }
 
-    this.nextToken()
-
     return parameters
   }
 
@@ -498,9 +507,38 @@ export default class Parser {
       },
     }
 
+    this.match(TokenType.RIGHT_PAREN);
+
     fn.body = this.parseBlockStatement()
 
     return fn
+  }
+
+  parseLambda(left) {
+    this.nextToken();
+
+    const lambda = {
+      type: 'Function',
+      toString() {
+        return `${this.params.toString()} => ${this.body.toString()}`
+      }
+    };
+
+    if (left.type === 'Identifier') {
+      lambda.params = {
+        type: 'Parameters',
+        body: [left],
+        toString() {
+          return `(${this.body.map(ident => ident.toString()).join(', ')})`
+        },
+      }
+    } else if (left.type === 'Parameters') {
+      lambda.params = left;
+    }
+
+    lambda.body = this.parseBlockOrStatement();
+
+    return lambda;
   }
 
   parseHash() {

@@ -1,0 +1,2 @@
+print('foo'.count()); // expect: 3
+print(''.count()); // expect: 0

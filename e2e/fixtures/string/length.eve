@@ -1,2 +1,0 @@
-print('foo'.length); // expect: 3
-print(''.length); // expect: 0

@@ -25,7 +25,7 @@ function run(input, env) {
  */
 function runFile(path) {
   const contents = fs.readFileSync(path, 'utf8')
-  run(contents, new Environment())
+  return run(contents, new Environment())
 }
 
 /**
@@ -55,7 +55,8 @@ function runPrompt() {
 if (process.argv.length > 3) {
   console.log('Usage: eve [script]')
 } else if (process.argv.length === 3) {
-  runFile(process.argv[2])
+  const error = runFile(process.argv[2])
+  if (error) throw error;
 } else {
   runPrompt()
 }

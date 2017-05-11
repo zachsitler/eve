@@ -38,6 +38,7 @@ export class TokenType {
   static FALSE = 32
   static NULL = 33
   static PERIOD = 34
+  static FAT_ARROW = 35
 }
 
 /*

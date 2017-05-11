@@ -241,6 +241,18 @@ describe('Parser', () => {
     })
   })
 
+  test('parseLambdaExpression()', () => {
+    const tests = [
+      { input: 'x => 1;', expected: '(x) => 1;' },
+      { input: 'x => { x + 1 };', expected: '(x) => { (x + 1); }' },
+      { input: '(x) => x;', expected: '(x) => x;' },
+      { input: '(x, y) => x + y;', expected: '(x, y) => (x + y);' },
+      { input: '() => x + y;', expected: '() => (x + y);' },
+    ]
+
+    runTests(tests)
+  })
+
   test('parseAssignmentExpression()', () => {
     const tests = [
       { input: 'a = b', expected: '(a = b)' },

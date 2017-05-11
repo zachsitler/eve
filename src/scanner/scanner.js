@@ -91,8 +91,11 @@ export default class Scanner {
         case '=':
           if (this.match('=')) {
             return this.addToken(TokenType.EQUAL_EQUAL)
+          } else if (this.match('>')) {
+            return this.addToken(TokenType.FAT_ARROW)
+          } else {
+            return this.addToken(TokenType.EQUAL)
           }
-          return this.addToken(TokenType.EQUAL)
 
         case '!':
           if (this.match('=')) {

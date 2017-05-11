@@ -72,7 +72,7 @@ export class Return extends EveObject {
  * it is a dynamic language, the length is not bound either.
  */
 export class Array {
-  constructor(elements) {
+  constructor(elements = []) {
     this.type = 'Array'
     this.elements = elements
   }
@@ -153,5 +153,17 @@ export class Function extends EveObject {
 
   inspect() {
     return `fn${this.params.toString()} ${this.body.toString()}`
+  }
+}
+
+export class Static extends EveObject {
+  constructor(fn) {
+    super()
+    this.fn = fn;
+    this.type = 'Static'
+  }
+
+  inspect() {
+    return this.fn.toString();
   }
 }

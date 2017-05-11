@@ -11,6 +11,11 @@ const runTests = tests => {
 
     if (actual.type === 'Error') {
       expect(actual.message).toBe(t.expected)
+    } else if (actual.type === 'Array') {
+      expect(actual.elements.length).toBe(t.expected.length)
+      t.expected.forEach((item, i) => {
+        expect(actual.elements[i].value).toBe(item)
+      })
     } else {
       expect(actual.value).toBe(t.expected)
     }
@@ -117,21 +122,6 @@ describe('Eval', () => {
 
   test('error handling', () => {
     const tests = [
-      { input: '5 + true', expected: 'type mismatch: Number + Boolean' },
-      { input: '5 + true; 5;', expected: 'type mismatch: Number + Boolean' },
-      { input: '-true', expected: 'unknown operator: -Boolean' },
-      {
-        input: 'true + false',
-        expected: 'unknown operator: Boolean + Boolean',
-      },
-      {
-        input: '5; true + false; 5',
-        expected: 'unknown operator: Boolean + Boolean',
-      },
-      {
-        input: 'if (true) { true + false }',
-        expected: 'unknown operator: Boolean + Boolean',
-      },
       { input: 'foo', expected: 'foo is not defined' },
       { input: 'let foo = 1; foo = bar;', expected: 'bar is not defined' },
       {
@@ -243,15 +233,120 @@ describe('Eval', () => {
     expect(actual.pairs.true.inspect()).toBe('[1,2,3]')
   })
 
-  test('.length', () => {
+  test('.count()', () => {
     const tests = [
-      { input: "'foo'.length", expected: 3 },
-      { input: "''.length", expected: 0 },
-      { input: '[1, 2, 3].length', expected: 3 },
-      { input: '[].length', expected: 0 },
-      { input: '{}.length', expected: null },
+      { input: "'foo'.count()", expected: 3 },
+      { input: "''.count()", expected: 0 },
+      { input: '[1, 2, 3].count()', expected: 3 },
+      { input: '[].count()', expected: 0 },
+      { input: '{}.count()', expected: 0 },
+      { input: `{'foo': 1, 'bar': 2}.count()`, expected: 2 },
     ]
 
     runTests(tests)
+  })
+
+  test('.map', () => {
+    const scanner = new Scanner('[1, 2, 3, 4].map(x => x + 1)')
+    const parser = new Parser(scanner)
+    const program = parser.parseProgram()
+    const actual = Eval(program, new Environment())
+
+    expect(actual.elements.length).toBe(4)
+    expect(actual.elements[0].value).toBe(2)
+    expect(actual.elements[1].value).toBe(3)
+    expect(actual.elements[2].value).toBe(4)
+    expect(actual.elements[3].value).toBe(5)
+  })
+
+  test('.first()', () => {
+    const tests = [
+      { input: "'foo'.first()", expected: 'f' },
+      { input: "''.first()", expected: '' },
+      { input: '[1, 2, 3].first()', expected: 1 },
+      { input: '[].first()', expected: null },
+    ]
+
+    runTests(tests)
+  })
+
+  test('.last()', () => {
+    const tests = [
+      { input: "'foo'.last()", expected: 'o' },
+      { input: "''.last()", expected: '' },
+      { input: '[1, 2, 3].last()', expected: 3 },
+      { input: '[].last()', expected: null },
+    ]
+
+    runTests(tests)
+  })
+
+  test('.rest()', () => {
+    const tests = [
+      { input: "'foo'.rest()", expected: 'oo' },
+      { input: "''.rest()", expected: '' },
+      { input: '[1, 2, 3].rest()', expected: [2, 3] },
+      { input: '[].rest()', expected: [] },
+    ]
+
+    runTests(tests)
+  })
+
+  test('.each()', () => {
+    const tests = [
+      { input: 'let sum = 0; [1, 2].each(x => sum = x + sum); sum', expected: 3},
+      { input: '[1, 2, 3].each()', expected: null},
+    ]
+
+    runTests(tests)
+  })
+
+  test('.sort', () => {
+    const tests = [
+      { input: '[4, 3, 2, 1].sort()', expected: [1, 2, 3, 4] },
+      { input: '[4, 3, 2, 1].sort((a, b) => a - b)', expected: [1, 2, 3, 4] },
+      { input: '[1, 2, 3, 4].sort((a, b) => b - a)', expected: [4, 3, 2, 1] }
+    ]
+
+    runTests(tests);
+  })
+
+  test('.reverse', () => {
+    const tests = [
+      { input: '[4, 3, 2, 1].reverse()', expected: [1, 2, 3, 4] },
+      { input: '[1, 2, 3, 4].reverse()', expected: [4, 3, 2, 1] },
+      { input: '[].reverse()', expected: [] },
+      { input: `'foo'.reverse()`, expected: 'oof' },
+      { input: `''.reverse()`, expected: '' },
+    ]
+
+    runTests(tests);
+  })
+
+  test('.avg', () => {
+    const tests = [
+      { input: '[1, 2, 3].avg()', expected: 2 },
+      { input: '[1].avg()', expected: 1 }
+    ]
+
+    runTests(tests);
+  })
+
+  test('.sum', () => {
+    const tests = [
+      { input: '[1, 2, 3].sum()', expected: 6 },
+      { input: '[1].sum()', expected: 1 }
+    ]
+
+    runTests(tests);
+  })
+
+  test('.filter', () => {
+    const tests = [
+      { input: '[1, 2, 3].filter(x => x > 1)', expected: [2, 3] },
+      { input: '[].filter()', expected: [] },
+    ]
+
+    runTests(tests);
   })
 })

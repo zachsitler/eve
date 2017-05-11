@@ -100,6 +100,10 @@ describe('Scanner', () => {
           input: '>=',
           expected: { type: TokenType.GREATER_EQUAL, literal: '>=' },
         },
+        {
+          input: '=>',
+          expected: { type: TokenType.FAT_ARROW, literal: '=>' },
+        },
       ]
 
       tests.forEach(({ input, expected }) => {

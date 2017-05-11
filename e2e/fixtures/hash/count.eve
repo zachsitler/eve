@@ -1,0 +1,2 @@
+print({'foo': 1, 'bar': 2}.count()); // expect: 2
+print({}.count()); // expect: 0

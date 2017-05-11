@@ -1,8 +1,4 @@
-let makeAdder = fn(x) {
-  return fn(y) {
-    return x + y;
-  };
-};
+let makeAdder = x => y => x + y;
 
 let add5 = makeAdder(5);
 let add10 = makeAdder(10);

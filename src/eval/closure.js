@@ -21,4 +21,12 @@ export default class Closure extends Environment {
 
     return obj
   }
+
+  set(name, obj) {
+    if (!this.store[name] && this.get(name)) {
+      return this.outer.set(name, obj);
+    }
+
+    return this.store[name] = obj;
+  }
 }
