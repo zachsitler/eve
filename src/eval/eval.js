@@ -96,7 +96,7 @@ const statics = {
           applyFunction(fn, [elem])
         })
       } else if (obj.type === 'String') {
-        const result = obj.value.split('').map(elem => {
+        obj.value.split('').map(elem => {
           return applyFunction(fn, [new Eve.String(elem)])
         })
       }
