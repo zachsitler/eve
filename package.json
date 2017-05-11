@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "bin": "./build/eve",
-  "repository": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zachsitler/eve.git"
+  },
   "author": "Zach Sitler <zachsitler@gmail.com>",
   "license": "MIT",
   "scripts": {
