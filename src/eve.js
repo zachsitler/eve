@@ -56,7 +56,7 @@ if (process.argv.length > 3) {
   console.log('Usage: eve [script]')
 } else if (process.argv.length === 3) {
   const error = runFile(process.argv[2])
-  if (error) throw error;
+  if (error) throw error
 } else {
   runPrompt()
 }

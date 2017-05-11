@@ -12,161 +12,172 @@ const statics = {
    * @param  {Object} obj
    * @return {EveObject}
    */
-  count: (obj) => new Eve.Static(() => {
-    if (obj.type === 'String') {
-      return new Eve.Number(obj.value.length)
-    } else if (obj.type === 'Array') {
-      return new Eve.Number(obj.elements.length)
-    } else if (obj.type === 'Hash') {
-      return new Eve.Number(Object.keys(obj.pairs).length)
-    }
+  count: obj =>
+    new Eve.Static(() => {
+      if (obj.type === 'String') {
+        return new Eve.Number(obj.value.length)
+      } else if (obj.type === 'Array') {
+        return new Eve.Number(obj.elements.length)
+      } else if (obj.type === 'Hash') {
+        return new Eve.Number(Object.keys(obj.pairs).length)
+      }
 
-    return new Eve.Null()
-  }),
+      return new Eve.Null()
+    }),
 
-  first: (obj) => new Eve.Static(() => {
-    if (obj.type === 'String') {
-      return new Eve.String(obj.value[0] || '')
-    } else if (obj.type === 'Array') {
-      return obj.elements[0] || new Eve.Null()
-    }
+  first: obj =>
+    new Eve.Static(() => {
+      if (obj.type === 'String') {
+        return new Eve.String(obj.value[0] || '')
+      } else if (obj.type === 'Array') {
+        return obj.elements[0] || new Eve.Null()
+      }
 
-    return new Eve.Null()
-  }),
+      return new Eve.Null()
+    }),
 
-  last: (obj) => new Eve.Static(() => {
-    if (obj.type === 'String') {
-      return new Eve.String(obj.value[obj.value.length - 1] || '')
-    } else if (obj.type === 'Array') {
-      return obj.elements[obj.elements.length - 1] || new Eve.Null()
-    }
+  last: obj =>
+    new Eve.Static(() => {
+      if (obj.type === 'String') {
+        return new Eve.String(obj.value[obj.value.length - 1] || '')
+      } else if (obj.type === 'Array') {
+        return obj.elements[obj.elements.length - 1] || new Eve.Null()
+      }
 
-    return new Eve.Null()
-  }),
+      return new Eve.Null()
+    }),
 
-  rest: (obj) => new Eve.Static(() => {
-    if (obj.type === 'String') {
-      return new Eve.String(obj.value.slice(1))
-    } else if (obj.type === 'Array') {
-      return new Eve.Array(obj.elements.slice(1))
-    }
+  rest: obj =>
+    new Eve.Static(() => {
+      if (obj.type === 'String') {
+        return new Eve.String(obj.value.slice(1))
+      } else if (obj.type === 'Array') {
+        return new Eve.Array(obj.elements.slice(1))
+      }
 
-    return new Eve.Null()
-  }),
+      return new Eve.Null()
+    }),
 
-  map: (obj) => new Eve.Static((...args) => {
-    const [fn] = args;
+  map: obj =>
+    new Eve.Static((...args) => {
+      const [fn] = args
 
-    if (!fn) return new Eve.Null();
+      if (!fn) return new Eve.Null()
 
-    if (obj.type === 'Array') {
-      const result = obj.elements.map((elem) => {
-        return applyFunction(fn, [elem]);
-      })
+      if (obj.type === 'Array') {
+        const result = obj.elements.map(elem => {
+          return applyFunction(fn, [elem])
+        })
 
-      // Return a new array, rather than mutating.
-      return new Eve.Array(result)
-    }
+        // Return a new array, rather than mutating.
+        return new Eve.Array(result)
+      }
 
-    if (obj.type === 'String') {
-      const result = obj.value.split('').map((elem) => {
-        return applyFunction(fn, [new Eve.String(elem)]);
-      });
+      if (obj.type === 'String') {
+        const result = obj.value.split('').map(elem => {
+          return applyFunction(fn, [new Eve.String(elem)])
+        })
 
-      // Return a new array, rather than mutating.
-      return new Eve.String(result.map(x => x.inspect()).join(''));
-    }
+        // Return a new array, rather than mutating.
+        return new Eve.String(result.map(x => x.inspect()).join(''))
+      }
 
-    return new Eve.Null()
-  }),
+      return new Eve.Null()
+    }),
 
-  each: (obj) => new Eve.Static((...args) => {
-    const [fn] = args;
+  each: obj =>
+    new Eve.Static((...args) => {
+      const [fn] = args
 
-    if (!fn) return new Eve.Null();
+      if (!fn) return new Eve.Null()
 
-    if (obj.type === 'Array') {
-      obj.elements.forEach((elem) => {
-        applyFunction(fn, [elem]);
-      })
-    } else if (obj.type === 'String') {
-      const result = obj.value.split('').map((elem) => {
-        return applyFunction(fn, [new Eve.String(elem)]);
-      });
-    }
+      if (obj.type === 'Array') {
+        obj.elements.forEach(elem => {
+          applyFunction(fn, [elem])
+        })
+      } else if (obj.type === 'String') {
+        const result = obj.value.split('').map(elem => {
+          return applyFunction(fn, [new Eve.String(elem)])
+        })
+      }
 
-    return new Eve.Null()
-  }),
+      return new Eve.Null()
+    }),
 
-  sort: (obj) => new Eve.Static((...args) => {
-    const [fn] = args;
+  sort: obj =>
+    new Eve.Static((...args) => {
+      const [fn] = args
 
-    if (obj.type === 'Array') {
-      const result = obj.elements.sort((a, b) => {
-        if (!fn) return a.inspect() - b.inspect();
+      if (obj.type === 'Array') {
+        const result = obj.elements.sort((a, b) => {
+          if (!fn) return a.inspect() - b.inspect()
 
-        return applyFunction(fn, [a, b]).inspect();
-      })
+          return applyFunction(fn, [a, b]).inspect()
+        })
 
-      // Return a new array, rather than mutating.
-      return new Eve.Array(result)
-    }
+        // Return a new array, rather than mutating.
+        return new Eve.Array(result)
+      }
 
-    return new Eve.Null()
-  }),
+      return new Eve.Null()
+    }),
 
-  reverse: (obj) => new Eve.Static(() => {
-    if (obj.type === 'Array') {
-      return new Eve.Array(obj.elements.reverse())
-    }
+  reverse: obj =>
+    new Eve.Static(() => {
+      if (obj.type === 'Array') {
+        return new Eve.Array(obj.elements.reverse())
+      }
 
-    if (obj.type === 'String') {
-      const result = obj.value.split('').reverse().join('');
-      return new Eve.String(result);
-    }
+      if (obj.type === 'String') {
+        const result = obj.value.split('').reverse().join('')
+        return new Eve.String(result)
+      }
 
-    return new Eve.Null()
-  }),
+      return new Eve.Null()
+    }),
 
-  avg: (obj) => new Eve.Static(() => {
-    if (obj.type === 'Array') {
-      const sum = obj.elements.reduce((x, y) => {
-        return x + Number(y.inspect())
-      }, 0);
+  avg: obj =>
+    new Eve.Static(() => {
+      if (obj.type === 'Array') {
+        const sum = obj.elements.reduce((x, y) => {
+          return x + Number(y.inspect())
+        }, 0)
 
-      return new Eve.Number(sum / obj.elements.length);
-    }
+        return new Eve.Number(sum / obj.elements.length)
+      }
 
-    return new Eve.Null()
-  }),
+      return new Eve.Null()
+    }),
 
-  sum: (obj) => new Eve.Static(() => {
-    if (obj.type === 'Array') {
-      const sum = obj.elements.reduce((x, y) => {
-        return x + Number(y.inspect())
-      }, 0);
+  sum: obj =>
+    new Eve.Static(() => {
+      if (obj.type === 'Array') {
+        const sum = obj.elements.reduce((x, y) => {
+          return x + Number(y.inspect())
+        }, 0)
 
-      return new Eve.Number(sum);
-    }
+        return new Eve.Number(sum)
+      }
 
-    return new Eve.Null()
-  }),
+      return new Eve.Null()
+    }),
 
-  filter: (obj) => new Eve.Static((...args) => {
-    const [fn] = args;
+  filter: obj =>
+    new Eve.Static((...args) => {
+      const [fn] = args
 
-    if (!fn) return new Eve.Array();
+      if (!fn) return new Eve.Array()
 
-    if (obj.type === 'Array') {
-      const result = obj.elements.filter((elem) => {
-        return applyFunction(fn, [elem]).inspect();
-      })
+      if (obj.type === 'Array') {
+        const result = obj.elements.filter(elem => {
+          return applyFunction(fn, [elem]).inspect()
+        })
 
-      return new Eve.Array(result)
-    }
+        return new Eve.Array(result)
+      }
 
-    return new Eve.Null()
-  }),
+      return new Eve.Null()
+    }),
 }
 
 /**
@@ -264,7 +275,7 @@ function applyFunction(fn, args) {
       return fn.fn(...args)
 
     case 'Static':
-      return fn.fn(...args);
+      return fn.fn(...args)
 
     default:
       return new Eve.Error(`not a function: ${fn.type}`)
@@ -343,7 +354,7 @@ function evalIndexHashExpression(hash, index) {
   }
 
   if (statics[index.inspect()]) {
-    return statics[index.inspect()](hash);
+    return statics[index.inspect()](hash)
   }
 
   return new Eve.Null()

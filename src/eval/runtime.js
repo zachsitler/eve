@@ -159,11 +159,11 @@ export class Function extends EveObject {
 export class Static extends EveObject {
   constructor(fn) {
     super()
-    this.fn = fn;
+    this.fn = fn
     this.type = 'Static'
   }
 
   inspect() {
-    return this.fn.toString();
+    return this.fn.toString()
   }
 }

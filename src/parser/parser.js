@@ -306,9 +306,7 @@ export default class Parser {
 
       this.nextToken()
       left = infix(left)
-
     }
-
 
     return left
   }
@@ -454,9 +452,13 @@ export default class Parser {
   }
 
   parseGroupOrParameters() {
-    this.match(TokenType.LEFT_PAREN);
+    this.match(TokenType.LEFT_PAREN)
 
-    if (this.isCurToken(TokenType.RIGHT_PAREN) || (this.isCurToken(TokenType.IDENTIFIER) && this.isPeekToken(TokenType.COMMA))) {
+    if (
+      this.isCurToken(TokenType.RIGHT_PAREN) ||
+      (this.isCurToken(TokenType.IDENTIFIER) &&
+        this.isPeekToken(TokenType.COMMA))
+    ) {
       return this.parseParameterList()
     }
 
@@ -507,7 +509,7 @@ export default class Parser {
       },
     }
 
-    this.match(TokenType.RIGHT_PAREN);
+    this.match(TokenType.RIGHT_PAREN)
 
     fn.body = this.parseBlockStatement()
 
@@ -515,14 +517,14 @@ export default class Parser {
   }
 
   parseLambda(left) {
-    this.nextToken();
+    this.nextToken()
 
     const lambda = {
       type: 'Function',
       toString() {
         return `${this.params.toString()} => ${this.body.toString()}`
-      }
-    };
+      },
+    }
 
     if (left.type === 'Identifier') {
       lambda.params = {
@@ -533,12 +535,12 @@ export default class Parser {
         },
       }
     } else if (left.type === 'Parameters') {
-      lambda.params = left;
+      lambda.params = left
     }
 
-    lambda.body = this.parseBlockOrStatement();
+    lambda.body = this.parseBlockOrStatement()
 
-    return lambda;
+    return lambda
   }
 
   parseHash() {

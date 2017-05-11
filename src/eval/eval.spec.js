@@ -294,8 +294,11 @@ describe('Eval', () => {
 
   test('.each()', () => {
     const tests = [
-      { input: 'let sum = 0; [1, 2].each(x => sum = x + sum); sum', expected: 3},
-      { input: '[1, 2, 3].each()', expected: null},
+      {
+        input: 'let sum = 0; [1, 2].each(x => sum = x + sum); sum',
+        expected: 3,
+      },
+      { input: '[1, 2, 3].each()', expected: null },
     ]
 
     runTests(tests)
@@ -305,10 +308,10 @@ describe('Eval', () => {
     const tests = [
       { input: '[4, 3, 2, 1].sort()', expected: [1, 2, 3, 4] },
       { input: '[4, 3, 2, 1].sort((a, b) => a - b)', expected: [1, 2, 3, 4] },
-      { input: '[1, 2, 3, 4].sort((a, b) => b - a)', expected: [4, 3, 2, 1] }
+      { input: '[1, 2, 3, 4].sort((a, b) => b - a)', expected: [4, 3, 2, 1] },
     ]
 
-    runTests(tests);
+    runTests(tests)
   })
 
   test('.reverse', () => {
@@ -320,25 +323,25 @@ describe('Eval', () => {
       { input: `''.reverse()`, expected: '' },
     ]
 
-    runTests(tests);
+    runTests(tests)
   })
 
   test('.avg', () => {
     const tests = [
       { input: '[1, 2, 3].avg()', expected: 2 },
-      { input: '[1].avg()', expected: 1 }
+      { input: '[1].avg()', expected: 1 },
     ]
 
-    runTests(tests);
+    runTests(tests)
   })
 
   test('.sum', () => {
     const tests = [
       { input: '[1, 2, 3].sum()', expected: 6 },
-      { input: '[1].sum()', expected: 1 }
+      { input: '[1].sum()', expected: 1 },
     ]
 
-    runTests(tests);
+    runTests(tests)
   })
 
   test('.filter', () => {
@@ -347,6 +350,6 @@ describe('Eval', () => {
       { input: '[].filter()', expected: [] },
     ]
 
-    runTests(tests);
+    runTests(tests)
   })
 })
