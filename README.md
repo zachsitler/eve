@@ -18,18 +18,18 @@ let pointPerGameLeaders = players
      return { player.name: player.ppg }
    });
 
-print('Point per game leaders: ' + pointPerGameLeaders); // ==> Point per game leaders: [{ 'Russell Westbrook': 31.6 }, ...];
+print(pointPerGameLeaders); // ==> Point per game leaders: [{ 'Russell Westbrook': 31.6 }, ... ]
 
 let averagePointsPerGameUnder30 = players
   .filter(player => player.age < 30)
   .map(player => player.ppg)
   .avg();
 
-print('Average Points Per Game Under 30: ' + averagePointsPerGameUnder30); // ==> 28.6
+print('Average Points Per Game Under 30: ' + averagePointsPerGameUnder30); // ==> ...: 28.6
 
 print('Number of players with five assists or better: ' + players
   .filter(player => player.apg > 5)
-  .count()); // ==> Number of players with... 3
+  .count()); // ==> Number of players with five assists or better: 3
 
 print('Most assists per game: ' + players
   .map(player => player.apg)
