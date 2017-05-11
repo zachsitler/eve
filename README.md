@@ -1,9 +1,7 @@
-# Eve [![Build Status: Linux](https://travis-ci.org/avajs/ava.svg?branch=master)](https://travis-ci.org/avajs/ava)
+# Eve [![Build Status](https://travis-ci.com/zachsitler/eve.svg?token=jM57TwesxyoNy8ahi5gJ&branch=master)](https://travis-ci.com/zachsitler/eve)
 
 Eve is a little, toy, javascript like langauge interpreted in javascript.
 I made it entirely for fun.
-
-
 
 ## Getting started
 ```sh
