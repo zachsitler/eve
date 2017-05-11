@@ -66,7 +66,7 @@ All numbers are stored as doubles (64-bit) values.
 ```js
 5; // integer
 -10; // negative values
-10.234 // floating points
+10.234; // floating points
 ```
 
 ### Strings
