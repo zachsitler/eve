@@ -3,7 +3,7 @@
 Eve is a little, toy, javascript like langauge interpreted in javascript.
 I made it entirely for fun.
 
-### Getting started
+## Getting started
 ```sh
 $ git clone git@github.com:zachsitler/eve.git
 $ cd eve && npm install
